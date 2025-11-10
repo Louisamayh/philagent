@@ -7,6 +7,7 @@ import os
 import json
 import asyncio
 import uuid
+import signal
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 from datetime import datetime
@@ -486,6 +487,31 @@ async def delete_job(job_id: str):
     del active_jobs[job_id]
 
     return {"message": "Job stopped and deleted successfully"}
+
+
+@app.post("/api/shutdown")
+async def shutdown():
+    """Shutdown the PhilAgent server"""
+    # Cancel all active tasks
+    for job_id, task in list(active_tasks.items()):
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
+    # Clear all jobs
+    active_jobs.clear()
+    active_tasks.clear()
+
+    # Schedule shutdown after response is sent
+    async def delayed_shutdown():
+        await asyncio.sleep(0.5)  # Give time for response to be sent
+        os.kill(os.getpid(), signal.SIGTERM)
+
+    asyncio.create_task(delayed_shutdown())
+
+    return {"message": "PhilAgent shutting down..."}
 
 
 # Mount static files directory

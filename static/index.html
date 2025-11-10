@@ -27,6 +27,7 @@
             text-align: center;
             color: white;
             margin-bottom: 30px;
+            position: relative;
         }
 
         .header h1 {
@@ -38,6 +39,28 @@
         .header p {
             font-size: 1.1em;
             opacity: 0.9;
+        }
+
+        .exit-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .exit-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .card {
@@ -457,6 +480,7 @@
 <body>
     <div class="container">
         <div class="header">
+            <button class="exit-button" onclick="exitApp()">✕ Exit PhilAgent</button>
             <h1>🎯 PhilAgent</h1>
             <p>Automated Lead Scraping & Enrichment</p>
         </div>
@@ -739,6 +763,34 @@
 
             } catch (error) {
                 console.error('Failed to update status:', error);
+            }
+        }
+
+        // Exit application
+        async function exitApp() {
+            if (!confirm('Are you sure you want to exit PhilAgent? This will shut down the application.')) {
+                return;
+            }
+
+            try {
+                // Cancel any running jobs first
+                if (currentJobId) {
+                    await fetch(`/api/jobs/${currentJobId}`, { method: 'DELETE' });
+                }
+
+                // Call shutdown endpoint
+                await fetch('/api/shutdown', { method: 'POST' });
+
+                // Show goodbye message
+                document.body.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;">
+                        <h1 style="font-size: 3em; margin-bottom: 20px;">👋 PhilAgent Stopped</h1>
+                        <p style="font-size: 1.2em; opacity: 0.9;">You can safely close this browser window now.</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Exit failed:', error);
+                alert('Failed to exit cleanly. You may need to close the application manually.');
             }
         }
 
