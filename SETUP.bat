@@ -56,13 +56,31 @@ if not exist ".env" (
 )
 
 echo.
+echo 🖥️  Creating desktop shortcut...
+
+REM Get the desktop path
+set DESKTOP=%USERPROFILE%\Desktop
+
+REM Get the current directory
+set CURRENT_DIR=%~dp0
+
+REM Create desktop shortcut using PowerShell
+powershell -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%DESKTOP%\PhilAgent.lnk'); $s.TargetPath = '%CURRENT_DIR%PhilAgent.bat'; $s.WorkingDirectory = '%CURRENT_DIR%'; $s.IconLocation = '%CURRENT_DIR%PhilAgent.ico'; $s.Save()"
+
+if exist "%DESKTOP%\PhilAgent.lnk" (
+    echo ✅ Desktop shortcut created
+) else (
+    echo ⚠️  Could not create desktop shortcut
+)
+
+echo.
 echo ==========================================
 echo ✅ Setup Complete!
 echo ==========================================
 echo.
 echo 📱 To start PhilAgent:
-echo    Double-click: PhilAgent.bat
-echo.
-echo    Or run: start.bat
+echo    1. Double-click the PhilAgent icon on your desktop
+echo    2. Or double-click: PhilAgent.bat (in this folder)
+echo    3. Or run: start.bat
 echo ==========================================
 pause

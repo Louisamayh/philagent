@@ -1,0 +1,11 @@
+#!/bin/bash
+# PhilAgent Mac App Launcher
+
+# Get the directory where this app bundle is located
+APP_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
+
+# Change to the project directory
+cd "$APP_DIR"
+
+# Run the launcher
+python3 launcher.py
