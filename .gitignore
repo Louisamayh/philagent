@@ -1,8 +1,34 @@
-echo "venv/
+# Python
+venv/
 __pycache__/
-.DS_Store
-output/
-*.log
 *.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
 .env
-" > .gitignore
+output/
+uploads/
+runs/
+*.log
+config.json
+
+# Temp files
+*.tmp
+.cache/

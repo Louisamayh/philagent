@@ -119,6 +119,7 @@ async def scrape_search_row(
     # browser_use Agent returns 'final_result()' as text OR 'structured_output'
     # We'll try both.
     result_json_str = None
+    result_json = []  # Initialize to empty list
 
     # try structured_output first
     if hasattr(history, "structured_output") and history.structured_output:
