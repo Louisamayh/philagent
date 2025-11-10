@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
-from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -48,6 +48,7 @@ RUNS_DIR.mkdir(exist_ok=True)
 
 # Global job tracking
 active_jobs: Dict[str, Dict[str, Any]] = {}
+active_tasks: Dict[str, asyncio.Task] = {}
 
 
 # ==================== Data Models ====================
@@ -224,6 +225,10 @@ async def run_job(job_id: str, input_file: Path, config: JobConfig):
             active_jobs[job_id]["message"] = f"Scraping {len(input_rows)} searches..."
 
             for idx, row in enumerate(input_rows):
+                # Check if job was cancelled
+                if job_id not in active_jobs:
+                    print(f"Job {job_id} was cancelled")
+                    return
                 active_jobs[job_id]["message"] = f"Scraping search {idx + 1}/{len(input_rows)}"
                 active_jobs[job_id]["progress"] = 10 + int(40 * (idx / len(input_rows)))
 
@@ -307,6 +312,14 @@ async def run_job(job_id: str, input_file: Path, config: JobConfig):
         active_jobs[job_id]["message"] = f"Job completed: {len(all_postings)} jobs scraped"
         active_jobs[job_id]["completed_at"] = datetime.now().isoformat()
 
+    except asyncio.CancelledError:
+        # Job was cancelled by user
+        print(f"Job {job_id} was cancelled")
+        if job_id in active_jobs:
+            active_jobs[job_id]["status"] = "stopped"
+            active_jobs[job_id]["message"] = "Job stopped by user"
+            active_jobs[job_id]["completed_at"] = datetime.now().isoformat()
+        raise  # Re-raise to properly cancel the task
     except Exception as e:
         # Check if job still exists (user may have stopped/deleted it)
         if job_id in active_jobs:
@@ -315,6 +328,10 @@ async def run_job(job_id: str, input_file: Path, config: JobConfig):
             active_jobs[job_id]["message"] = f"Job failed: {str(e)}"
             active_jobs[job_id]["completed_at"] = datetime.now().isoformat()
         print(f"Job {job_id} failed: {str(e)}")
+    finally:
+        # Clean up task reference
+        if job_id in active_tasks:
+            del active_tasks[job_id]
 
 
 # ==================== API Endpoints ====================
@@ -364,7 +381,7 @@ async def upload_file(file: UploadFile = File(...)):
 
 
 @app.post("/api/jobs/start")
-async def start_job(request: JobStartRequest, background_tasks: BackgroundTasks):
+async def start_job(request: JobStartRequest):
     """Start a new job with given configuration"""
     try:
         # Validate input file exists
@@ -391,8 +408,9 @@ async def start_job(request: JobStartRequest, background_tasks: BackgroundTasks)
         # Save config
         save_config(request.config)
 
-        # Start job in background
-        background_tasks.add_task(run_job, job_id, input_path, request.config)
+        # Start job in background and store task
+        task = asyncio.create_task(run_job(job_id, input_path, request.config))
+        active_tasks[job_id] = task
 
         return {"job_id": job_id, "message": "Job started successfully"}
 
@@ -442,11 +460,20 @@ async def download_output(job_id: str, file_type: str):
 
 @app.delete("/api/jobs/{job_id}")
 async def delete_job(job_id: str):
-    """Delete a job and its outputs"""
+    """Stop and delete a job and its outputs"""
     if job_id not in active_jobs:
         raise HTTPException(status_code=404, detail="Job not found")
 
     job = active_jobs[job_id]
+
+    # Cancel the running task if it exists
+    if job_id in active_tasks:
+        task = active_tasks[job_id]
+        task.cancel()
+        try:
+            await task  # Wait for task to finish cancellation
+        except asyncio.CancelledError:
+            pass  # Expected
 
     # Delete output files
     for file_path in job["output_files"].values():
@@ -458,7 +485,7 @@ async def delete_job(job_id: str):
     # Remove from active jobs
     del active_jobs[job_id]
 
-    return {"message": "Job deleted successfully"}
+    return {"message": "Job stopped and deleted successfully"}
 
 
 # Mount static files directory
