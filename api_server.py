@@ -222,6 +222,10 @@ async def run_job(job_id: str, input_file: Path, config: JobConfig):
         # Phase 1: Scraping
         all_postings: List[Dict[str, Any]] = []
 
+        # Set up output file paths
+        raw_output_path = OUTPUT_DIR / f"{job_id}_jobs_raw.csv"
+        active_jobs[job_id]["output_files"]["raw"] = str(raw_output_path)
+
         if config.scraping_enabled:
             active_jobs[job_id]["message"] = f"Scraping {len(input_rows)} searches..."
 
@@ -278,34 +282,54 @@ async def run_job(job_id: str, input_file: Path, config: JobConfig):
                 )
                 all_postings.extend(postings)
 
+                # Auto-save every 20 postings (approximately every 1-2 searches)
+                if len(all_postings) >= 20 and len(all_postings) % 20 == 0:
+                    write_jobs_raw_csv(str(raw_output_path), all_postings)
+                    print(f"Auto-saved {len(all_postings)} postings")
+
             active_jobs[job_id]["progress"] = 50
             active_jobs[job_id]["message"] = f"Scraped {len(all_postings)} jobs"
 
-            # Write raw output
-            raw_output_path = OUTPUT_DIR / f"{job_id}_jobs_raw.csv"
+            # Final write to catch any remaining postings
             write_jobs_raw_csv(str(raw_output_path), all_postings)
-            active_jobs[job_id]["output_files"]["raw"] = str(raw_output_path)
 
         # Phase 2: Enrichment
         enriched_postings: List[Dict[str, Any]] = []
+        enriched_output_path = OUTPUT_DIR / f"{job_id}_jobs_enriched.csv"
 
         if config.enrichment_enabled and all_postings:
             active_jobs[job_id]["message"] = f"Enriching {len(all_postings)} jobs..."
+            active_jobs[job_id]["output_files"]["enriched"] = str(enriched_output_path)
 
-            # Process enrichment
-            enriched_postings = await enrich_postings_with_companies(
-                llm=llm,
-                postings=all_postings,
-                max_steps=40
-            )
+            # Process enrichment in batches with auto-save
+            batch_size = 10
+            for i in range(0, len(all_postings), batch_size):
+                # Check if job was cancelled
+                if job_id not in active_jobs:
+                    print(f"Job {job_id} was cancelled during enrichment")
+                    return
+
+                batch = all_postings[i:i + batch_size]
+                batch_num = (i // batch_size) + 1
+                total_batches = (len(all_postings) + batch_size - 1) // batch_size
+
+                active_jobs[job_id]["message"] = f"Enriching batch {batch_num}/{total_batches} ({len(enriched_postings) + len(batch)}/{len(all_postings)} jobs)..."
+                active_jobs[job_id]["progress"] = 50 + int(40 * (i / len(all_postings)))
+
+                # Enrich this batch
+                batch_enriched = await enrich_postings_with_companies(
+                    llm=llm,
+                    postings=batch,
+                    max_steps=40
+                )
+                enriched_postings.extend(batch_enriched)
+
+                # Auto-save after each batch
+                write_jobs_enriched_csv(str(enriched_output_path), enriched_postings)
+                print(f"Auto-saved {len(enriched_postings)} enriched postings")
 
             active_jobs[job_id]["progress"] = 90
             active_jobs[job_id]["message"] = f"Enriched {len(enriched_postings)} jobs"
-
-            # Write enriched output
-            enriched_output_path = OUTPUT_DIR / f"{job_id}_jobs_enriched.csv"
-            write_jobs_enriched_csv(str(enriched_output_path), enriched_postings)
-            active_jobs[job_id]["output_files"]["enriched"] = str(enriched_output_path)
 
         # Complete
         active_jobs[job_id]["status"] = "completed"
