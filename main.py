@@ -265,7 +265,7 @@ async def main():
             job_title=job_title,
             location=location,
             miles=miles,
-            max_steps=40,
+            max_steps=500,
         )
 
         # stash postings

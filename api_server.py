@@ -139,10 +139,15 @@ def write_jobs_raw_csv(out_path: str, postings: List[Dict[str, Any]]):
     """Write raw scraped jobs to CSV"""
     import csv
 
-    if not postings:
-        return
-
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+
+    print(f"DEBUG: write_jobs_raw_csv called with {len(postings)} postings")
+    print(f"DEBUG: Output path: {out_path}")
+
+    # Always create the file, even if empty, so user knows it ran
+    # if not postings:
+    #     print("WARNING: No postings to write, but creating empty CSV file anyway")
+    #     # return
 
     fieldnames = [
         "job_id", "source_url", "search_job_title", "search_location",
@@ -151,10 +156,17 @@ def write_jobs_raw_csv(out_path: str, postings: List[Dict[str, Any]]):
         "responsibilities_snippet"
     ]
 
-    with open(out_path, 'w', encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(postings)
+    try:
+        with open(out_path, 'w', encoding='utf-8', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(postings)
+        print(f"✓ Successfully wrote {len(postings)} rows to {out_path}")
+    except Exception as e:
+        print(f"ERROR: Failed to write CSV to {out_path}: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 
 def write_jobs_enriched_csv(out_path: str, enriched: List[Dict[str, Any]]):
@@ -272,20 +284,26 @@ async def run_job(job_id: str, input_file: Path, config: JobConfig):
                     continue
 
                 # Scrape this search
-                postings = await scrape_search_row(
-                    llm=llm,
-                    base_url=base_url,
-                    job_title=job_title,
-                    location=location,
-                    miles=miles,
-                    max_steps=40
-                )
-                all_postings.extend(postings)
+                try:
+                    postings = await scrape_search_row(
+                        llm=llm,
+                        base_url=base_url,
+                        job_title=job_title,
+                        location=location,
+                        miles=miles,
+                        max_steps=500
+                    )
+                    all_postings.extend(postings)
+                    print(f"Scraped {len(postings)} postings from search {idx + 1}")
+                except Exception as scrape_err:
+                    print(f"Error scraping search {idx + 1}: {scrape_err}")
+                    # Continue with next search instead of failing entire job
+                    continue
 
-                # Auto-save every 20 postings (approximately every 1-2 searches)
-                if len(all_postings) >= 20 and len(all_postings) % 20 == 0:
+                # Auto-save after every 5 searches (rows) are processed
+                if (idx + 1) % 5 == 0:
                     write_jobs_raw_csv(str(raw_output_path), all_postings)
-                    print(f"Auto-saved {len(all_postings)} postings")
+                    print(f"Auto-saved after {idx + 1} searches - {len(all_postings)} total postings")
 
             active_jobs[job_id]["progress"] = 50
             active_jobs[job_id]["message"] = f"Scraped {len(all_postings)} jobs"
@@ -320,7 +338,7 @@ async def run_job(job_id: str, input_file: Path, config: JobConfig):
                 batch_enriched = await enrich_postings_with_companies(
                     llm=llm,
                     postings=batch,
-                    max_steps=40
+                    max_steps=100
                 )
                 enriched_postings.extend(batch_enriched)
 
@@ -341,16 +359,38 @@ async def run_job(job_id: str, input_file: Path, config: JobConfig):
         # Job was cancelled by user
         print(f"Job {job_id} was cancelled")
         if job_id in active_jobs:
+            # Save partial results before stopping
+            if all_postings:
+                try:
+                    write_jobs_raw_csv(str(raw_output_path), all_postings)
+                    print(f"Saved {len(all_postings)} partial results before stopping")
+                    active_jobs[job_id]["message"] = f"Job stopped by user - saved {len(all_postings)} results"
+                except Exception as save_err:
+                    print(f"Failed to save partial results: {save_err}")
+                    active_jobs[job_id]["message"] = "Job stopped by user"
+            else:
+                active_jobs[job_id]["message"] = "Job stopped by user"
+
             active_jobs[job_id]["status"] = "stopped"
-            active_jobs[job_id]["message"] = "Job stopped by user"
             active_jobs[job_id]["completed_at"] = datetime.now().isoformat()
         raise  # Re-raise to properly cancel the task
     except Exception as e:
         # Check if job still exists (user may have stopped/deleted it)
         if job_id in active_jobs:
+            # Try to save partial results before marking as failed
+            if all_postings:
+                try:
+                    write_jobs_raw_csv(str(raw_output_path), all_postings)
+                    print(f"Saved {len(all_postings)} partial results before failure")
+                    active_jobs[job_id]["message"] = f"Job failed but saved {len(all_postings)} results: {str(e)}"
+                except Exception as save_err:
+                    print(f"Failed to save partial results: {save_err}")
+                    active_jobs[job_id]["message"] = f"Job failed: {str(e)}"
+            else:
+                active_jobs[job_id]["message"] = f"Job failed: {str(e)}"
+
             active_jobs[job_id]["status"] = "failed"
             active_jobs[job_id]["error"] = str(e)
-            active_jobs[job_id]["message"] = f"Job failed: {str(e)}"
             active_jobs[job_id]["completed_at"] = datetime.now().isoformat()
         print(f"Job {job_id} failed: {str(e)}")
     finally:
