@@ -1,0 +1,31 @@
+job_id,scraped_job_title,recruiter_name,job_location_text,possible_hiring_company_1,possible_hiring_company_2,possible_hiring_company_3,possible_hiring_company_4,possible_hiring_company_5,reasoning
+29bcbc8e-031c-4420-891f-7a8191345088,Mechanical Design Engineer,WB Power Services Ltd,Heanor,,,,,,"Parser error, raw text: Based on the detailed analysis of the job description and strategic web searches, the most likely company hiring for the Mechanical Design Engineer role is Power Security Generators.... (Expecting value: line 1 column 1 (char 0))"
+aec7972b-b55f-475d-8fdc-d7eed3753fde,Mechanical Design Engineer,Redshore,"Leicester, City of Leicester. Based in Leicestershire on the border of Rugby, Northamptonshire and Wawickshire.",,,,,,"Parser error, raw text: {
+  ""possible_hiring_companies"": [
+    ""Sigma Precision Components UK Ltd""
+  ],
+  ""reasoning"": ""The investigation focused on identifying a leading Midlands-based manufacturer of highly technical/p... (Invalid control character at: line 5 column 306 (char 389))"
+5a121564-6e00-48f3-823d-adb37a2d08b4,Mechanical Design Lead,BAE Systems,Isle of Wight – Cowes or Portsmouth – Broad Oak. We offer a range of hybrid and flexible working arrangements – please speak to your recruiter about the options for this particular role.,,,,,,"Parser error, raw text: The actual hiring company is most likely QinetiQ.... (Expecting value: line 1 column 1 (char 0))"
+8a12e414-f58d-4ba8-b1ea-27258b4d6393,Lead Mechanical and Process Engineer,British Gypsum,"Loughborough, Leicestershire",,,,,,"Parser error, raw text: {
+  ""possible_hiring_companies"": [
+    ""Saint-Gobain"",
+    ""SAINT-GOBAIN LIMITED"",
+    ""Saint-Gobain Construction Products UK Limited""
+  ],
+  ""reasoning"": ""The job description overwhelmingly points to... (Invalid control character at: line 7 column 384 (char 523))"
+49201df6-80db-4f0d-bb7f-31f96241da35,Mechanical Design Engineer,Bennett and Game Recruitment LTD,"Derby, Derbyshire",,,,,,"No clear match, could not infer hiring company."
+d7a9fbae-ea7b-4af7-a52b-c8f5271c7f42,Mechanical Design Engineer,Optima UK Inc Ltd,"Leicester, Leicestershire",Ridgway Machines Ltd,,,,,"The primary clues identified were a 'specialist engineering business' in 'Leicester' that focuses on 'designing and manufacturing precision machinery' and 'rotating machinery' (including 'full machine design'). Previous searches eliminated general precision engineering firms and component manufacturers. The search for 'full machine design rotating machinery Leicester' led to Ridgway Machines Ltd. Ridgway Machines specializes in the design and manufacture of 'Coil Winding Machinery' in Leicester, which is a specific type of complex, precision rotating machinery. This highly specific product focus and location make them the strongest match for the job description's unique requirements."
+9ed87a4c-eba3-42e3-bd0f-ed4724413eb7,Mechanical Design Engineer,Rise Technical Recruitment,"Leicester, Leicestershire. Commutable from Leicester, Loughborough, Hinckley, Coalville, Market Harborough, Melton Mowbray, Ashby-de-la-Zouch, Wigston, Lutterworth, Blaby",,,,,,"Parser error, raw text: The ultimate goal was to identify the hiring company for a Mechanical Design Engineer role in Leicestershire, based on specific clues. The company must: 1) Be located in Leicestershire; 2) Design and ... (Expecting value: line 1 column 1 (char 0))"
+,,,,,,,,,"Parser error, raw text: I was unable to identify any possible hiring companies because the provided input data was insufficient. The `job_title`, `recruiter_name`, `job_location_text`, and `responsibilities_snippet` were emp... (Expecting value: line 1 column 1 (char 0))"
+230a055c-c3de-40e7-a7b1-bb2d1fc57f32,Mechanical Design Engineer,TRS (Technical Recruitment Solutions),"Burntwood, Staffordshire",Unitech Machinery,,,,,"The analysis focused on four key clues from the job posting: location ('Burntwood, Staffordshire'), job type ('Mechanical Design Engineer'), product focus ('bespoke design and machines'), and industry ('manufacturing'). A web search for 'Bespoke machinery manufacturer Burntwood Staffordshire' identified Unitech Machinery as the primary candidate. Their website confirms they are 'surface finishing systems experts' who 'design, manufacture, and install bespoke systems' for industries including automotive, aerospace, and manufacturing, all from their 'state-of-the-art Burntwood facility'. This company is a near-perfect match for the location and the specialized bespoke manufacturing requirement. Although specific software like Solidworks and AutoCAD were not explicitly found on their public 'About Us' page, the combination of bespoke machinery manufacturing and the precise location makes Unitech Machinery the highly likely employer."
+cc1981d4-6fe1-4dcd-82ae-f46643ec5174,Mechanical Design Engineer,Premier Engineering,Birmingham,,,,,,"Parser error, raw text: Based on the input job description, I was tasked with identifying the actual employer for a Mechanical Design Engineer role advertised by Premier Engineering in Birmingham. 
+
+**Clues Identified:**
+1. ... (Expecting value: line 1 column 1 (char 0))"
+9dc8d109-2a25-46ba-aacf-6d9d179ae4b0,Mechanical Design Engineer – Building Services,Synergy Personnel Services,"Ilkeston, Derbyshire",,,,,,"Parser error, raw text: Based on the clues, the most likely hiring company is Engineering Design & Build Consultancy Ltd.... (Expecting value: line 1 column 1 (char 0))"
+41bd313a-7ad2-4863-8d93-3b511bd4b120,Mechanical Design Engineer,Redshore,"Rugby, Warwickshire",,,,,,"Parser error, raw text: {
+  ""possible_hiring_companies"": [
+    ""Technoset Group""
+  ],
+  ""reasoning"": ""I identified several key clues from the job description: location (Rugby, Warwickshire), industry focus (leading manufactu... (Invalid control character at: line 5 column 339 (char 400))"
+fc3d3798-0cae-4d7e-9778-a704561776ed,Mechanical Design Engineer,Concept Technical,"Derby, Derbyshire",,,,,,"No clear match, could not infer hiring company."

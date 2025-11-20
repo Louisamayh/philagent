@@ -32,16 +32,15 @@ class JobPosting(BaseModel):
     search_location: str
     search_radius_miles: str
 
-    # Data visible directly on the results page card (NO clicking into details)
-    scraped_job_title: str = Field(..., description="Job title text shown on the listing card")
-    recruiter_name: str = Field(..., description="Name of the recruiter / agency shown on the card")
-    job_location_text: str = Field(..., description="Location text shown on the card")
-    salary_benefits: str = Field(..., description="Salary / benefits text shown on the card, if available")
-    description_snippet: str = Field(..., description="Short job description snippet or summary visible on card")
-    responsibilities_snippet: str = Field(..., description="Key responsibilities or duties visible on card")
+    # Data collected from the job detail page
+    scraped_job_title: str = Field(..., description="Full job title from detail page")
+    recruiter_name: str = Field(..., description="Name of the recruiter / agency that posted the job")
+    job_location_text: str = Field(..., description="Job location address from detail page")
+    salary_benefits: str = Field(..., description="Advertised salary and benefits from detail page, if available")
+    description_snippet: str = Field(..., description="Job description summary or overview from detail page")
+    responsibilities_snippet: str = Field(..., description="Key responsibilities, skills, requirements from detail page")
 
-    # (Optional in case card doesn't show responsibilities separately)
-    # responsibilities_snippet can be "" if not present.
+    # Note: Any field can be an empty string "" if not found on the detail page
 
 
 def _build_scrape_task(base_url: str, job_title: str, location: str, miles: str) -> str:
@@ -49,36 +48,17 @@ def _build_scrape_task(base_url: str, job_title: str, location: str, miles: str)
     We give browser_use.Agent a deterministic instruction that:
     - Open CVLibrary
     - Enter search criteria
-    - Scrape ONLY what's visible on the search results page
+    - Collect ALL job detail page links from ALL pages first
+    - Then loop through each link to collect detailed information
     - Return structured JSON matching JobPosting[]
     """
     return f"""
-You are a data collection browser agent. You MUST follow these rules exactly, first we are giving you some contaxt and then you will find your instructions:
+You are a data collection browser agent. You MUST follow these rules exactly in TWO PHASES:
 
 GOAL:
-Collect job posting data from CVLibrary.co.uk details below.
+Collect job posting data from CVLibrary.co.uk
 
-Pt 1: Context 
-
-SCROLLING: You may need to scroll to find all the information you require, scroll slowly, ONCE or TWICE, then pause and check for the new content. Then you can scroll again if you need to.
-   STOP scrolling if:
-   - The page doesn't move when you try to scroll (you're at the bottom)
-
-TRACKING STRATEGY - Each job listing can be quite similar. We need you to open each joblisting one at a time. So you do not get lost, use unique URLs to avoid duplicates:
-   - Maintain a list of job detail page URLs you have already visited
-   - Each job detail page has a unique URL
-   - Before clicking a job, check if you've already visited its detail page URL
-   - Only click jobs you haven't visited yet
-   - The jobs are in list format so please start from the top and work your way down.
-   NOTE: Job titles, recruiters, and locations may be similar or identical - the URL is the unique identifier.
-
-
-Context:
-You will be searching for jobs on CVLibrary.co.uk, when you reach the job listings page, you will see multiple job cards displayed vertically. There is 25 jobs per page typically. To get to the next page of results, you will need to click the pagination buttons at the bottom of the page (e.g. "2", "3", or "Next").
-
-Part 2: Step by Step Instructions  to follow EXACTLY:
-
-To start: 
+=== PHASE 1: COLLECT ALL JOB LINKS ===
 
 STEPS:
 1. Go to this URL: {base_url}
@@ -88,33 +68,37 @@ STEPS:
    - Enter the radius/miles: "{miles}" (miles radius)
    - Start the search.
 
-3. After the search results load, you will see a page with multiple job listing cards displayed vertically. This is the "job listing page".
+3. After the search results load, you will see a page with multiple job listing cards displayed vertically.
+   Each card has a clickable job title link that goes to the job detail page.
 
-4. (one time only) SAVE THE LISTINGS PAGE URL:
-   - Record the current URL of the search results page (the page showing all the job cards)
-   - If at some point you cant navigate back to the job listing tab, you can use this URL to navigate back after viewing each job detail page
-   - This is your "home base" URL that you can return to if needs be.
+4. COLLECT LINKS FROM PAGE 1:
+   - Go through each job card on the page
+   - For each card, extract the URL of the job detail page (usually in the job title link)
+   - Store all these URLs in a list
+   - Scroll down if needed to see all job cards
+   - Typically there are 25 jobs per page
 
+5. CHECK FOR MORE PAGES:
+   - Look at the bottom of the page for pagination buttons (numbered like "1", "2", "3", "4", "5" or a "Next" button)
+   - If there are more pages, click to page 2
 
-5. ON THE JOB LISTING PAGE, do the following FOR EACH JOB:
+6. COLLECT LINKS FROM PAGE 2 (and 3, 4, 5, etc.):
+   - Repeat step 4 for this page
+   - Add all new job detail URLs to your list
+   - Click to the next page (page 3, then 4, then 5, etc.)
+   - Continue until there are no more pages
 
-   a) Make sure you are on the correct job listings page (if not, navigate to the saved listings URL)
+7. After collecting ALL links from ALL pages, you should have a complete list of job detail page URLs.
+   For example, if there are 3 pages with 25 jobs each, you should have approximately 75 URLs.
 
-   b) Identify the job listing card you need to process:
-      - For the FIRST job: Start with the top-most job listing card
-      - For subsequent jobs: Find the card directly BELOW the one you just completed
+=== PHASE 2: VISIT EACH LINK AND COLLECT DATA ===
 
-   c) BEFORE CLICKING - Read and remember the description snippet visible on THIS card:
-      - Note down the job description text shown on the listing card
-      - This will help you verify your position when you return to the listings page
+8. Now loop through your list of job detail URLs ONE BY ONE:
 
-   d) Click that job's "title" link to open the "job detail page" (may open in a new tab)
+   For each URL:
+   a) Navigate directly to that job detail page URL
 
-   e) On the job detail page:
-      - Record/remember the current page URL (this is the unique identifier for this job)
-      - The information you need will be throughout the page, you may need to scroll to see everything
-
-   f) Collect the following information from the detail page:
+   b) On the job detail page, collect the following information:
       1. Full job title → store in scraped_job_title
       2. Company/recruiter name that posted the job → store in recruiter_name
       3. Job location address (e.g. 'Rochester, Kent (England)') → store in job_location_text
@@ -122,36 +106,23 @@ STEPS:
       5. Summary or overview of the job opportunity → store in description_snippet
       6. Key responsibilities, skills, requirements, machinery skills needed, etc. → store in responsibilities_snippet
 
-   g) Return to the job listings page (navigate back to your saved "home base" URL if needed)
+   c) You may need to scroll down the job detail page to see all information
 
-   h) Find the NEXT job listing to process:
-      - The next job should be directly BELOW the one you just completed
-      - You may need to scroll down slightly to see it
-      - VERIFY you have the correct card: Look at the card ABOVE your selected card - its description should match the description you noted in step (c)
-      - If the descriptions don't match, scroll up/down to find the correct card
+   d) Move to the next URL in your list and repeat
 
-   i) Repeat steps (c) through (h) for each job listing, working your way down the list one at a time
+9. Continue until you have processed ALL URLs from your collected list.
 
-   j) Continue until you have processed ALL job listings on this page (typically 25 jobs per page)
+=== HOW TO RETURN DATA ===
 
+10. DO NOT use write_file or any file operations!
+    DO NOT create files like job_data.jsonl!
+    Keep ALL data in memory and return it as JSON at the end.
 
-6. After scraping all jobs on page 1, check for numbered buttoms at the bottom of the job listing page (numbered buttons like "1", "2", "3" or a "Next" button):
-   - Click "2" (or "Next") to go to page 2
-   - SAVE this new page's URL as your new "home base" listings URL ** if you get lost you can use this URL to return to this page ** However if you can't navigate back to this page, you can always return to the original search URL from step 1 and re-enter the search criteria to get back to page 1, then click "2" to get to page 2.
-   - Repeat steps 5 for all jobs on page 2
-   - 0nce finished anaylsing all job details on page two repeat step five except click button, 3 after 3 is completed click 4, etc. until there are no more pages, updating your "home base" URL each time
-
-8. ⚠️ CRITICAL - HOW TO RETURN DATA ⚠️:
-
-   DO NOT use write_file or any file operations!
-   DO NOT create files like job_data.jsonl!
-   Keep ALL data in memory and return it as JSON at the end.
-
-   Return your final answer as a JSON list of objects.
+    Return your final answer as a JSON list of objects.
 
 Each object MUST include these exact fields:
    - job_id: Generate a fresh UUID4 string for each posting (e.g., "a1b2c3d4-e5f6-7890-1234-567890abcdef")
-   - source_url: The search results page URL (string)
+   - source_url: The job detail page URL you visited (string)
    - search_job_title: The exact string "{job_title}"
    - search_location: The exact string "{location}"
    - search_radius_miles: The exact string "{miles}"
@@ -165,7 +136,7 @@ Each object MUST include these exact fields:
 EXAMPLE of one complete object:
 {{
     "job_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-    "source_url": "https://www.cv-library.co.uk/search-jobs?q=engineer&geo=london&distance=10",
+    "source_url": "https://www.cv-library.co.uk/job/12345678/senior-software-engineer",
     "search_job_title": "{job_title}",
     "search_location": "{location}",
     "search_radius_miles": "{miles}",
@@ -177,12 +148,14 @@ EXAMPLE of one complete object:
     "responsibilities_snippet": "Design and develop software solutions, mentor junior developers, participate in code reviews..."
 }}
 
-9. IMPORTANT:
+IMPORTANT:
    - Do NOT use write_file, save_file, or create any files
-   - Do NOT include pagination info.
-   - Do NOT include ads/sponsored widgets unless they are real job cards.
-   - Do NOT hallucinate fields you cannot see. Use "" if missing.
-   - Make sure the JSON you return is valid and parseable.
+   - Do NOT include pagination info
+   - Do NOT include ads/sponsored widgets unless they are real job cards
+   - Do NOT hallucinate fields you cannot see. Use "" if missing
+   - Make sure the JSON you return is valid and parseable
+   - In PHASE 1, collect ALL links from ALL pages before starting PHASE 2
+   - In PHASE 2, visit each link directly using the URLs you collected
 
 Your ONLY output should be that JSON list of job posting objects - NO FILE OPERATIONS!
 """
@@ -197,7 +170,8 @@ async def scrape_search_row(
     max_steps: int = 40,
 ) -> List[dict]:
     """
-    Launches a browser_use.Agent to perform 1 CVLibrary query and scrape the first page.
+    Launches a browser_use.Agent to perform 1 CVLibrary query and scrape ALL pages.
+    Uses two-phase approach: collect all job links first, then visit each one.
     Returns a list of dicts (each one matches JobPosting schema).
     """
 

@@ -21,7 +21,8 @@ from pydantic import BaseModel, Field
 # Import existing functionality
 from browser_use import ChatGoogle
 from main import detect_dialect
-from scraping_agent import scrape_search_row, JobPosting
+from link_collector import collect_links_from_single_page, save_links_to_csv
+from job_scraper import scrape_jobs_from_links
 from company_matcher import enrich_postings_with_companies, EnrichedPosting
 
 # Initialize FastAPI app
@@ -39,12 +40,14 @@ app.add_middleware(
 # Storage paths
 UPLOAD_DIR = Path("uploads")
 OUTPUT_DIR = Path("output")
+FINAL_OUTPUT_DIR = Path("final_output")
 RUNS_DIR = Path("runs")
 CONFIG_FILE = Path("config.json")
 
 # Ensure directories exist
 UPLOAD_DIR.mkdir(exist_ok=True)
 OUTPUT_DIR.mkdir(exist_ok=True)
+FINAL_OUTPUT_DIR.mkdir(exist_ok=True)
 RUNS_DIR.mkdir(exist_ok=True)
 
 # Global job tracking
@@ -213,9 +216,14 @@ def write_jobs_enriched_csv(out_path: str, enriched: List[Dict[str, Any]]):
 
 async def run_job(job_id: str, input_file: Path, config: JobConfig):
     """
-    Execute a complete job run with scraping and enrichment.
+    Execute a complete job run with TWO-PHASE scraping and enrichment.
+    Phase 1: Collect all job links (max 5 pages per search)
+    Phase 2: Scrape each link for full details (autosave every 25 jobs)
     Updates job status in active_jobs dictionary.
     """
+    all_postings: List[Dict[str, Any]] = []
+    raw_output_path = FINAL_OUTPUT_DIR / f"{job_id}_jobs_raw.csv"
+
     try:
         # Initialize LLM
         llm = ChatGoogle(model="gemini-flash-latest")
@@ -231,23 +239,19 @@ async def run_job(job_id: str, input_file: Path, config: JobConfig):
         if not input_rows:
             raise ValueError("No valid rows found in input file")
 
-        # Phase 1: Scraping
-        all_postings: List[Dict[str, Any]] = []
-
         # Set up output file paths
-        raw_output_path = OUTPUT_DIR / f"{job_id}_jobs_raw.csv"
         active_jobs[job_id]["output_files"]["raw"] = str(raw_output_path)
+        links_output_path = OUTPUT_DIR / f"{job_id}_links.csv"
+        active_jobs[job_id]["output_files"]["links"] = str(links_output_path)
 
         if config.scraping_enabled:
-            active_jobs[job_id]["message"] = f"Scraping {len(input_rows)} searches..."
+            active_jobs[job_id]["message"] = f"Processing {len(input_rows)} searches..."
 
             for idx, row in enumerate(input_rows):
                 # Check if job was cancelled
                 if job_id not in active_jobs:
                     print(f"Job {job_id} was cancelled")
                     return
-                active_jobs[job_id]["message"] = f"Scraping search {idx + 1}/{len(input_rows)}"
-                active_jobs[job_id]["progress"] = 10 + int(40 * (idx / len(input_rows)))
 
                 # Extract fields from row (with flexible column names)
                 base_url = (
@@ -283,71 +287,206 @@ async def run_job(job_id: str, input_file: Path, config: JobConfig):
                 if not job_title:
                     continue
 
-                # Scrape this search
-                try:
-                    postings = await scrape_search_row(
-                        llm=llm,
-                        base_url=base_url,
-                        job_title=job_title,
-                        location=location,
-                        miles=miles,
-                        max_steps=500
-                    )
-                    all_postings.extend(postings)
-                    print(f"Scraped {len(postings)} postings from search {idx + 1}")
-                except Exception as scrape_err:
-                    print(f"Error scraping search {idx + 1}: {scrape_err}")
-                    # Continue with next search instead of failing entire job
+                search_info = {
+                    "job_title": job_title,
+                    "location": location,
+                    "miles": miles
+                }
+
+                # ===== PHASE 1: COLLECT LINKS PAGE-BY-PAGE (max 5 pages) =====
+                active_jobs[job_id]["message"] = f"PHASE 1: Collecting links for search {idx + 1}/{len(input_rows)}"
+                active_jobs[job_id]["progress"] = 10 + int(20 * (idx / len(input_rows)))
+
+                all_links_for_search = []
+                current_page_url = None
+
+                # Loop through pages 1-5
+                for page_num in range(1, 6):  # Pages 1, 2, 3, 4, 5
+                    # Check if job was cancelled
+                    if job_id not in active_jobs:
+                        print(f"Job {job_id} was cancelled")
+                        return
+
+                    active_jobs[job_id]["message"] = f"PHASE 1: Page {page_num}/5 for search {idx + 1}/{len(input_rows)}"
+
+                    try:
+                        # Increase max_steps for later pages (they take longer to navigate to)
+                        page_max_steps = 150 if page_num == 1 else 200
+
+                        # Collect links from this page
+                        result = await collect_links_from_single_page(
+                            llm=llm,
+                            base_url=base_url,
+                            job_title=job_title,
+                            location=location,
+                            miles=miles,
+                            page_number=page_num,
+                            search_url=current_page_url,
+                            max_steps=page_max_steps
+                        )
+
+                        page_links = result.get("links", [])
+                        current_page_url = result.get("current_page_url", "")
+
+                        if page_links:
+                            all_links_for_search.extend(page_links)
+
+                            # AUTOSAVE after each page
+                            append_mode = (page_num > 1)  # Append for pages 2-5, overwrite for page 1
+                            save_links_to_csv(page_links, str(links_output_path), search_info, append=append_mode)
+                            print(f"✓ Page {page_num}: Saved {len(page_links)} links (Total: {len(all_links_for_search)})")
+
+                            # Warn if page has suspiciously few links (might have stopped mid-task)
+                            if len(page_links) < 10 and page_num <= 3:
+                                print(f"⚠ WARNING: Page {page_num} only returned {len(page_links)} links (expected ~25)")
+                                print(f"⚠ Agent may have stopped mid-task. Check logs/link_collection_*.log")
+                        else:
+                            # No links found on this page, might be the last page
+                            print(f"⚠ Page {page_num}: No links found, stopping pagination")
+                            if page_num <= 2:
+                                print(f"⚠ WARNING: Stopped early on page {page_num}. This might be an error!")
+                                print(f"⚠ Check logs/link_collection_*.log for details")
+                            break
+
+                    except Exception as page_err:
+                        print(f"Error collecting page {page_num} for search {idx + 1}: {page_err}")
+                        # Continue to next page or stop if this was a critical error
+                        break
+
+                if not all_links_for_search:
+                    print(f"⚠ No links collected from search {idx + 1}")
                     continue
 
-                # Auto-save after every 5 searches (rows) are processed
-                if (idx + 1) % 5 == 0:
-                    write_jobs_raw_csv(str(raw_output_path), all_postings)
-                    print(f"Auto-saved after {idx + 1} searches - {len(all_postings)} total postings")
+                print(f"✓ PHASE 1 Complete: Collected {len(all_links_for_search)} total links from search {idx + 1}")
+
+                # ===== PHASE 2: SCRAPE EACH LINK =====
+                # Read links from the CSV that Phase 1 just saved
+                from job_scraper import read_links_from_csv, scrape_single_job
+
+                try:
+                    links, csv_search_info = read_links_from_csv(str(links_output_path))
+                    print(f"✓ PHASE 2: Read {len(links)} links from CSV for search {idx + 1}")
+                except Exception as read_err:
+                    print(f"Error reading links CSV: {read_err}")
+                    continue
+
+                if not links:
+                    print(f"⚠ No links found in CSV for search {idx + 1}")
+                    continue
+
+                active_jobs[job_id]["message"] = f"PHASE 2: Scraping {len(links)} jobs for search {idx + 1}/{len(input_rows)}"
+                active_jobs[job_id]["progress"] = 30 + int(20 * (idx / len(input_rows)))
+
+                try:
+                    # Scrape jobs one by one with autosave every 25 jobs
+                    search_postings = []
+                    for link_idx, link in enumerate(links):
+                        # Check if job was cancelled
+                        if job_id not in active_jobs:
+                            print(f"Job {job_id} was cancelled")
+                            return
+
+                        job_url = link.get("link_url", "")
+                        if not job_url:
+                            continue
+
+                        active_jobs[job_id]["message"] = f"Scraping job {link_idx + 1}/{len(links)} from search {idx + 1}/{len(input_rows)}"
+
+                        try:
+                            job_data = await scrape_single_job(
+                                llm=llm,
+                                job_url=job_url,
+                                search_info=csv_search_info,
+                                max_steps=50
+                            )
+                            search_postings.append(job_data)
+                            all_postings.append(job_data)
+
+                            # Auto-save every 25 jobs
+                            if len(all_postings) % 25 == 0:
+                                write_jobs_raw_csv(str(raw_output_path), all_postings)
+                                print(f"📝 Auto-saved after {len(all_postings)} jobs")
+
+                        except Exception as job_err:
+                            print(f"Error scraping job {link_idx + 1}: {job_err}")
+                            continue
+
+                    print(f"✓ Scraped {len(search_postings)} jobs from search {idx + 1}")
+
+                except Exception as scrape_err:
+                    print(f"Error in Phase 2 for search {idx + 1}: {scrape_err}")
+                    continue
 
             active_jobs[job_id]["progress"] = 50
-            active_jobs[job_id]["message"] = f"Scraped {len(all_postings)} jobs"
+            active_jobs[job_id]["message"] = f"Scraped {len(all_postings)} jobs total"
 
             # Final write to catch any remaining postings
             write_jobs_raw_csv(str(raw_output_path), all_postings)
+            print(f"✓ Final save: {len(all_postings)} total jobs")
 
-        # Phase 2: Enrichment
+        # Phase 3: Enrichment
         enriched_postings: List[Dict[str, Any]] = []
-        enriched_output_path = OUTPUT_DIR / f"{job_id}_jobs_enriched.csv"
+        enriched_output_path = FINAL_OUTPUT_DIR / f"{job_id}_jobs_enriched.csv"
+        enriched_partial_path = FINAL_OUTPUT_DIR / f"{job_id}_jobs_enriched_partial.csv"
 
-        if config.enrichment_enabled and all_postings:
-            active_jobs[job_id]["message"] = f"Enriching {len(all_postings)} jobs..."
-            active_jobs[job_id]["output_files"]["enriched"] = str(enriched_output_path)
+        if config.enrichment_enabled:
+            # Read Phase 2 output from CSV
+            phase2_postings = []
+            if raw_output_path.exists():
+                try:
+                    phase2_postings = read_input_rows(str(raw_output_path))
+                    print(f"✓ PHASE 3: Read {len(phase2_postings)} jobs from Phase 2 output")
+                except Exception as read_err:
+                    print(f"Error reading Phase 2 output: {read_err}")
+                    phase2_postings = []
 
-            # Process enrichment in batches with auto-save
-            batch_size = 10
-            for i in range(0, len(all_postings), batch_size):
-                # Check if job was cancelled
-                if job_id not in active_jobs:
-                    print(f"Job {job_id} was cancelled during enrichment")
-                    return
+            if not phase2_postings:
+                print("⚠ No jobs found in Phase 2 output, skipping enrichment")
+            else:
+                active_jobs[job_id]["message"] = f"Enriching {len(phase2_postings)} jobs..."
+                active_jobs[job_id]["output_files"]["enriched"] = str(enriched_output_path)
+                active_jobs[job_id]["output_files"]["enriched_partial"] = str(enriched_partial_path)
 
-                batch = all_postings[i:i + batch_size]
-                batch_num = (i // batch_size) + 1
-                total_batches = (len(all_postings) + batch_size - 1) // batch_size
+                # Process enrichment in batches with auto-save
+                batch_size = 10
+                for i in range(0, len(phase2_postings), batch_size):
+                    # Check if job was cancelled
+                    if job_id not in active_jobs:
+                        print(f"Job {job_id} was cancelled during enrichment")
+                        return
 
-                active_jobs[job_id]["message"] = f"Enriching batch {batch_num}/{total_batches} ({len(enriched_postings) + len(batch)}/{len(all_postings)} jobs)..."
-                active_jobs[job_id]["progress"] = 50 + int(40 * (i / len(all_postings)))
+                    batch = phase2_postings[i:i + batch_size]
+                    batch_num = (i // batch_size) + 1
+                    total_batches = (len(phase2_postings) + batch_size - 1) // batch_size
 
-                # Enrich this batch
-                batch_enriched = await enrich_postings_with_companies(
-                    llm=llm,
-                    postings=batch,
-                    max_steps=100
-                )
-                enriched_postings.extend(batch_enriched)
+                    active_jobs[job_id]["message"] = f"Enriching batch {batch_num}/{total_batches} ({len(enriched_postings) + len(batch)}/{len(phase2_postings)} jobs)..."
+                    active_jobs[job_id]["progress"] = 50 + int(40 * (i / len(phase2_postings)))
 
-                # Auto-save after each batch
+                    try:
+                        # Enrich this batch
+                        batch_enriched = await enrich_postings_with_companies(
+                            llm=llm,
+                            postings=batch,
+                            max_steps=50  # Allow enough steps for web search
+                        )
+                        enriched_postings.extend(batch_enriched)
+
+                        # Auto-save to PARTIAL file after each batch
+                        write_jobs_enriched_csv(str(enriched_partial_path), enriched_postings)
+                        print(f"📝 Auto-saved {len(enriched_postings)} enriched postings to partial file")
+
+                    except Exception as enrich_err:
+                        print(f"Error enriching batch {batch_num}: {enrich_err}")
+                        import traceback
+                        traceback.print_exc()
+                        # Continue with next batch even if this one fails
+
+                # Final save to main enriched file
                 write_jobs_enriched_csv(str(enriched_output_path), enriched_postings)
-                print(f"Auto-saved {len(enriched_postings)} enriched postings")
+                print(f"✓ Final save: {len(enriched_postings)} enriched jobs")
 
-            active_jobs[job_id]["progress"] = 90
-            active_jobs[job_id]["message"] = f"Enriched {len(enriched_postings)} jobs"
+                active_jobs[job_id]["progress"] = 90
+                active_jobs[job_id]["message"] = f"Enriched {len(enriched_postings)} jobs"
 
         # Complete
         active_jobs[job_id]["status"] = "completed"

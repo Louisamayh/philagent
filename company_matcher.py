@@ -2,6 +2,24 @@ from typing import List, Dict, Any
 from pydantic import BaseModel, Field
 from browser_use import Agent, ChatGoogle
 import json
+import logging
+from datetime import datetime
+from pathlib import Path
+
+# Set up file logging
+LOG_DIR = Path("logs")
+LOG_DIR.mkdir(exist_ok=True)
+log_file = LOG_DIR / f"company_matching_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_file),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 
 class EnrichedPosting(BaseModel):
@@ -27,8 +45,10 @@ def _build_company_task(posting: Dict[str, Any]) -> str:
     """
     Build instructions for the inference step.
     The agent will:
+    - Analyze job description to identify key clues
+    - Use web search to find companies matching those clues
     - NOT just repeat the recruiter/agency name
-    - Suggest real employers
+    - Return specific company names
     """
 
     job_title = posting.get("scraped_job_title", "")
@@ -38,8 +58,8 @@ def _build_company_task(posting: Dict[str, Any]) -> str:
     resp_snip = posting.get("responsibilities_snippet", "")
 
     return f"""
-You are a sourcing/intelligence assistant. Your job is to infer which actual company (employer)
-might be hiring for a given job advert that is currently being run by a recruiter / agency.
+You are a sourcing/intelligence assistant with web search capabilities. Your job is to identify which actual company (employer)
+is hiring for a job that's being advertised by a recruiter/agency.
 
 INPUT:
 - job_title: "{job_title}"
@@ -48,26 +68,39 @@ INPUT:
 - description_snippet: "{desc_snip}"
 - responsibilities_snippet: "{resp_snip}"
 
-TASK:
-1. You MUST ignore the recruiter/agency name. That is NOT the hiring company.
-2. Based on:
-   - Industry keywords in job_title and responsibilities_snippet
-   - Tech / domain keywords (e.g. aerospace, automotive, food production, precision engineering)
-   - Seniority level
-   - job_location_text (town / region / area)
-   infer 1 to 5 plausible real hiring companies that could be using that recruiter.
+YOUR TASK - FOLLOW THESE STEPS:
 
-3. Think like a headhunter:
-   - Which local companies in that area plausibly hire for this exact role?
-   - Which companies match the product / process mentioned? (e.g. “Tier 1 automotive”, “CNC precision machining”, “FMCG food packaging line maintenance”)
-   - It is okay to include subsidiaries or well-known local plants/factories.
+STEP 1: IDENTIFY CLUES
+Carefully analyze the job description and identify specific clues that could help narrow down the hiring company:
+- Specific machinery or equipment mentioned (e.g., "Hermle 5-axis CNC", "Fanuc robots", "injection molding")
+- Manufacturing processes (e.g., "precision machining", "assembly line", "quality control")
+- Industry sector (e.g., aerospace, automotive, food production, pharmaceutical)
+- Technologies or software (e.g., "AutoCAD", "SAP", "ISO9001")
+- Product types or materials (e.g., "aerospace components", "medical devices", "packaging")
+- Certifications or standards (e.g., "AS9100", "ISO 13485")
+- Company size indicators (e.g., "multinational", "SME", "family-owned")
+- Any other unique details that could identify a specific company
 
-4. VERY IMPORTANT:
-   - NEVER return the recruiter/agency name as a possible hiring company.
-   - Only return plausible end-employers.
-   - Companies MUST be specific names, not generic strings like "an aerospace firm".
-   - If you're not sure of exact names, produce the most likely named companies operating in that geography + domain.
-   - Between 1 and 5 companies is fine.
+STEP 2: WEB SEARCH
+Use web search to find companies in the location that match the clues you identified.
+Search strategically:
+- "companies in {loc} with [specific machine/process]"
+- "[industry] manufacturers in {loc}"
+- "[specific technology] companies {loc}"
+- Be creative with your searches based on the clues you found
+
+STEP 3: MATCH AND IDENTIFY
+- Cross-reference search results with the job requirements
+- If there's only ONE company in the area with that specific capability → that's very likely the answer!
+- If multiple companies match, rank them by how well they match the specific clues
+- Return 1-5 most likely companies
+
+CRITICAL RULES:
+- NEVER return the recruiter/agency name ("{recruiter}") as a possible hiring company
+- Only return specific company names you found through web search
+- DO NOT make up company names - only return companies you actually found
+- If a very specific clue (like rare machinery) matches only one company → prioritize that heavily
+- Companies MUST be real, specific names (e.g., "Rolls-Royce plc", "Toyota Manufacturing UK")
 
 OUTPUT FORMAT:
 Return ONLY a single valid JSON object like this:
@@ -77,10 +110,10 @@ Return ONLY a single valid JSON object like this:
     "Company 1 Limited",
     "Company 2 plc"
   ],
-  "reasoning": "Short explanation using location, industry and responsibilities."
+  "reasoning": "Explain what clues you identified, what you searched for, and why these companies match. Be specific about the key factors (e.g., 'Only company in Leicester with Hermle 5-axis CNC machines')."
 }}
 
-Do NOT include any other keys. The reasoning should be concise but concrete.
+Do NOT include any other keys. The reasoning should explain your detective work.
 """
 
 
@@ -99,13 +132,34 @@ async def _enrich_single_posting(
     agent = Agent(
         task=task,
         llm=llm,
-        step_timeout=90,
-        max_actions_per_step=6,
-        max_failures=2,
+        step_timeout=120,  # Increased for web search
+        max_actions_per_step=10,  # Allow more actions for searching
+        max_failures=3,
         # We'll parse JSON manually again
     )
 
-    history = await agent.run(max_steps=max_steps)
+    job_id = posting.get("job_id", "UNKNOWN")
+    job_title = posting.get("scraped_job_title", "")
+    logger.info(f"Starting company matching for job_id={job_id}: {job_title}")
+
+    try:
+        history = await agent.run(max_steps=max_steps)
+        logger.info(f"✓ Company matching completed for job_id={job_id}")
+    except Exception as e:
+        logger.error(f"Failed to match companies for job_id={job_id}: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        # Return empty result
+        return {
+            "job_id": job_id,
+            "scraped_job_title": job_title,
+            "recruiter_name": posting.get("recruiter_name", ""),
+            "job_location_text": posting.get("job_location_text", ""),
+            "description_snippet": posting.get("description_snippet", ""),
+            "responsibilities_snippet": posting.get("responsibilities_snippet", ""),
+            "possible_hiring_companies": [],
+            "reasoning": f"ERROR: {str(e)}"
+        }
 
     # We'll grab final_result() as text and json.loads it
     final_txt = ""
@@ -163,7 +217,7 @@ async def _enrich_single_posting(
 async def enrich_postings_with_companies(
     llm: ChatGoogle,
     postings: List[Dict[str, Any]],
-    max_steps: int = 20,
+    max_steps: int = 50,  # Increased for web search operations
 ) -> List[Dict[str, Any]]:
     """
     Loop over every scraped posting and infer possible hiring companies.
