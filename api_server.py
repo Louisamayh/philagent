@@ -11,6 +11,10 @@ import signal
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
@@ -23,7 +27,7 @@ from browser_use import ChatGoogle
 from main import detect_dialect
 from link_collector import collect_links_from_single_page, save_links_to_csv
 from job_scraper import scrape_jobs_from_links
-from company_matcher import enrich_postings_with_companies, EnrichedPosting
+from company_identifier import enrich_postings_with_company_identification
 
 # Initialize FastAPI app
 app = FastAPI(title="PhilAgent API", version="1.0.0")
@@ -138,6 +142,20 @@ def read_input_rows(path: str) -> List[Dict[str, str]]:
     return rows
 
 
+def read_phase2_jobs(path: str) -> List[Dict[str, Any]]:
+    """Read Phase 2 job data from CSV"""
+    import csv
+
+    with open(path, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        jobs = []
+        for row in reader:
+            # Keep original field names (don't normalize)
+            jobs.append(dict(row))
+
+    return jobs
+
+
 def write_jobs_raw_csv(out_path: str, postings: List[Dict[str, Any]]):
     """Write raw scraped jobs to CSV"""
     import csv
@@ -155,8 +173,8 @@ def write_jobs_raw_csv(out_path: str, postings: List[Dict[str, Any]]):
     fieldnames = [
         "job_id", "source_url", "search_job_title", "search_location",
         "search_radius_miles", "scraped_job_title", "recruiter_name",
-        "job_location_text", "salary_benefits", "description_snippet",
-        "responsibilities_snippet"
+        "job_location_text", "salary_benefits", "full_job_description",
+        "description_snippet", "responsibilities_snippet"
     ]
 
     try:
@@ -173,7 +191,7 @@ def write_jobs_raw_csv(out_path: str, postings: List[Dict[str, Any]]):
 
 
 def write_jobs_enriched_csv(out_path: str, enriched: List[Dict[str, Any]]):
-    """Write enriched jobs with company inferences to CSV"""
+    """Write enriched jobs with company identification to CSV"""
     import csv
 
     if not enriched:
@@ -181,35 +199,16 @@ def write_jobs_enriched_csv(out_path: str, enriched: List[Dict[str, Any]]):
 
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
 
-    # Flatten the possible_hiring_companies list into separate columns
-    rows_to_write = []
-    for rec in enriched:
-        companies = rec.get("possible_hiring_companies", [])
-        row = {
-            "job_id": rec.get("job_id", ""),
-            "scraped_job_title": rec.get("scraped_job_title", ""),
-            "recruiter_name": rec.get("recruiter_name", ""),
-            "job_location_text": rec.get("job_location_text", ""),
-            "possible_hiring_company_1": companies[0] if len(companies) > 0 else "",
-            "possible_hiring_company_2": companies[1] if len(companies) > 1 else "",
-            "possible_hiring_company_3": companies[2] if len(companies) > 2 else "",
-            "possible_hiring_company_4": companies[3] if len(companies) > 3 else "",
-            "possible_hiring_company_5": companies[4] if len(companies) > 4 else "",
-            "reasoning": rec.get("reasoning", ""),
-        }
-        rows_to_write.append(row)
-
     fieldnames = [
         "job_id", "scraped_job_title", "recruiter_name", "job_location_text",
-        "possible_hiring_company_1", "possible_hiring_company_2",
-        "possible_hiring_company_3", "possible_hiring_company_4",
-        "possible_hiring_company_5", "reasoning"
+        "full_job_description", "extracted_clues", "potential_companies",
+        "analysis_summary", "top_company", "top_confidence"
     ]
 
     with open(out_path, 'w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(rows_to_write)
+        writer.writerows(enriched)
 
 
 # ==================== Job Execution ====================
@@ -434,10 +433,12 @@ async def run_job(job_id: str, input_file: Path, config: JobConfig):
             phase2_postings = []
             if raw_output_path.exists():
                 try:
-                    phase2_postings = read_input_rows(str(raw_output_path))
+                    phase2_postings = read_phase2_jobs(str(raw_output_path))
                     print(f"✓ PHASE 3: Read {len(phase2_postings)} jobs from Phase 2 output")
                 except Exception as read_err:
                     print(f"Error reading Phase 2 output: {read_err}")
+                    import traceback
+                    traceback.print_exc()
                     phase2_postings = []
 
             if not phase2_postings:
@@ -463,11 +464,9 @@ async def run_job(job_id: str, input_file: Path, config: JobConfig):
                     active_jobs[job_id]["progress"] = 50 + int(40 * (i / len(phase2_postings)))
 
                     try:
-                        # Enrich this batch
-                        batch_enriched = await enrich_postings_with_companies(
-                            llm=llm,
-                            postings=batch,
-                            max_steps=50  # Allow enough steps for web search
+                        # Enrich this batch using OpenAI o1 company identification
+                        batch_enriched = await enrich_postings_with_company_identification(
+                            postings=batch
                         )
                         enriched_postings.extend(batch_enriched)
 

@@ -39,6 +39,7 @@ class JobPosting(BaseModel):
     recruiter_name: str = Field(..., description="Name of the recruiter / agency that posted the job")
     job_location_text: str = Field(..., description="Job location address from detail page")
     salary_benefits: str = Field(..., description="Advertised salary and benefits from detail page, if available")
+    full_job_description: str = Field(..., description="COMPLETE job description - every word from the job posting page, including all details, requirements, benefits, etc.")
     description_snippet: str = Field(..., description="Job description summary or overview from detail page")
     responsibilities_snippet: str = Field(..., description="Key responsibilities, skills, requirements from detail page")
 
@@ -64,11 +65,13 @@ URL: {job_url}
    - Company/recruiter name that posted the job
    - Job location (full address if available, e.g., 'Rochester, Kent (England)')
    - Advertised salary and benefits
+   - **COMPLETE job description - EVERY WORD from the entire job posting** (scroll down to get ALL text)
    - Job description summary or overview
    - Key responsibilities, skills, requirements, machinery skills needed, etc.
 
 3. IMPORTANT:
-   - You may need to scroll down to see all information
+   - You MUST scroll down to see ALL information on the page
+   - Capture the ENTIRE job description text - don't summarize, get every word
    - Some fields might not be present - use empty string "" if not found
    - Extract as much detail as possible
    - Do NOT hallucinate - only extract what you can actually see
@@ -82,6 +85,7 @@ Return a single JSON object with these exact fields:
     "recruiter_name": "Company or recruiter name",
     "job_location_text": "Full location text",
     "salary_benefits": "Salary and benefits text (or empty string if not shown)",
+    "full_job_description": "THE COMPLETE JOB DESCRIPTION - EVERY SINGLE WORD from the job posting",
     "description_snippet": "Job description/summary text",
     "responsibilities_snippet": "Responsibilities, requirements, skills needed"
 }}
@@ -182,6 +186,7 @@ async def scrape_single_job(
         "recruiter_name": result_json.get("recruiter_name", ""),
         "job_location_text": result_json.get("job_location_text", ""),
         "salary_benefits": result_json.get("salary_benefits", ""),
+        "full_job_description": result_json.get("full_job_description", ""),
         "description_snippet": result_json.get("description_snippet", ""),
         "responsibilities_snippet": result_json.get("responsibilities_snippet", ""),
     }
