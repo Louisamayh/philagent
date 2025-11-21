@@ -88,8 +88,9 @@ async def test_phase3(phase2_csv_path: str, max_jobs: int = 3):
 
     fieldnames = [
         "job_id", "scraped_job_title", "recruiter_name", "job_location_text",
-        "full_job_description", "extracted_clues", "potential_companies",
-        "analysis_summary", "top_company", "top_confidence"
+        "full_job_description", "extracted_clues", "industrial_cluster", "cluster_summary",
+        "potential_companies", "all_companies_readable", "analysis_summary",
+        "top_company", "top_confidence", "top_score"
     ]
 
     with open(output_path, 'w', encoding='utf-8', newline='') as f:

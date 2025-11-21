@@ -32,12 +32,12 @@ class EnrichedPosting(BaseModel):
 
     possible_hiring_companies: List[str] = Field(
         ...,
-        description="List of 1-5 possible real employers that may have hired the recruiter to fill this role"
+        description="List of 1-5 possible real companies/employers that may have hired the recruiter to fill this role"
     )
 
     reasoning: str = Field(
         ...,
-        description="Short explanation of why these companies are plausible: industry match, location match, role match"
+        description="Short explanation of why these companies are plausible: industry match, location is within the postcode/address provided, role match"
     )
 
 
@@ -45,8 +45,8 @@ def _build_company_task(posting: Dict[str, Any]) -> str:
     """
     Build instructions for the inference step.
     The agent will:
-    - Analyze job description to identify key clues
-    - Use web search to find companies matching those clues
+    - Analyze job description closly to identify key clues
+    - Use web search to find companies near the location matching those clues
     - NOT just repeat the recruiter/agency name
     - Return specific company names
     """
@@ -58,7 +58,7 @@ def _build_company_task(posting: Dict[str, Any]) -> str:
     resp_snip = posting.get("responsibilities_snippet", "")
 
     return f"""
-You are a sourcing/intelligence assistant with web search capabilities. Your job is to identify which actual company (employer)
+You are a sourcing/intelligence assistant with web search capabilities. Your job is to identify which actual company
 is hiring for a job that's being advertised by a recruiter/agency.
 
 INPUT:
@@ -72,6 +72,7 @@ YOUR TASK - FOLLOW THESE STEPS:
 
 STEP 1: IDENTIFY CLUES
 Carefully analyze the job description and identify specific clues that could help narrow down the hiring company:
+- Location details and address and postcode will likely be provided, the company can only be in that area
 - Specific machinery or equipment mentioned (e.g., "Hermle 5-axis CNC", "Fanuc robots", "injection molding")
 - Manufacturing processes (e.g., "precision machining", "assembly line", "quality control")
 - Industry sector (e.g., aerospace, automotive, food production, pharmaceutical)
@@ -80,18 +81,20 @@ Carefully analyze the job description and identify specific clues that could hel
 - Certifications or standards (e.g., "AS9100", "ISO 13485")
 - Company size indicators (e.g., "multinational", "SME", "family-owned")
 - Any other unique details that could identify a specific company
+- Company type (e.g., "manufacturer", "distributor", "service provider", software, etc.)
 
 STEP 2: WEB SEARCH
-Use web search to find companies in the location that match the clues you identified.
+Use live web search to find companies in the location that match the clues you identified.
 Search strategically:
 - "companies in {loc} with [specific machine/process]"
-- "[industry] manufacturers in {loc}"
+- "[industry] in {loc}"
 - "[specific technology] companies {loc}"
+- [company type] in {loc} (e.g., "aerospace manufacturers in Leicester")
 - Be creative with your searches based on the clues you found
 
 STEP 3: MATCH AND IDENTIFY
 - Cross-reference search results with the job requirements
-- If there's only ONE company in the area with that specific capability → that's very likely the answer!
+- If there's only ONE company in the area that could hire that role → that's likely the answer!
 - If multiple companies match, rank them by how well they match the specific clues
 - Return 1-5 most likely companies
 
@@ -133,7 +136,7 @@ async def _enrich_single_posting(
         task=task,
         llm=llm,
         step_timeout=120,  # Increased for web search
-        max_actions_per_step=10,  # Allow more actions for searching
+        max_actions_per_step=20,  # Allow more actions for searching
         max_failures=3,
         # We'll parse JSON manually again
     )

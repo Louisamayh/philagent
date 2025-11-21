@@ -201,8 +201,9 @@ def write_jobs_enriched_csv(out_path: str, enriched: List[Dict[str, Any]]):
 
     fieldnames = [
         "job_id", "scraped_job_title", "recruiter_name", "job_location_text",
-        "full_job_description", "extracted_clues", "potential_companies",
-        "analysis_summary", "top_company", "top_confidence"
+        "full_job_description", "extracted_clues", "industrial_cluster", "cluster_summary",
+        "potential_companies", "all_companies_readable", "analysis_summary",
+        "top_company", "top_confidence", "top_score"
     ]
 
     with open(out_path, 'w', encoding='utf-8', newline='') as f:
@@ -224,8 +225,11 @@ async def run_job(job_id: str, input_file: Path, config: JobConfig):
     raw_output_path = FINAL_OUTPUT_DIR / f"{job_id}_jobs_raw.csv"
 
     try:
-        # Initialize LLM
-        llm = ChatGoogle(model="gemini-flash-latest")
+        # Initialize LLM - Back to gemini-flash-latest (works reliably)
+        llm = ChatGoogle(
+            model="gemini-flash-latest",
+            max_output_tokens=8192
+        )
 
         # Update status
         active_jobs[job_id]["status"] = "running"
@@ -335,8 +339,9 @@ async def run_job(job_id: str, input_file: Path, config: JobConfig):
                             save_links_to_csv(page_links, str(links_output_path), search_info, append=append_mode)
                             print(f"✓ Page {page_num}: Saved {len(page_links)} links (Total: {len(all_links_for_search)})")
 
-                            # Warn if page has suspiciously few links (might have stopped mid-task)
-                            if len(page_links) < 10 and page_num <= 3:
+                            # Warn if page has suspiciously few links on early pages (might have stopped mid-task)
+                            # But don't warn if it's a later page (could be the last page with fewer jobs)
+                            if len(page_links) < 10 and page_num == 1:
                                 print(f"⚠ WARNING: Page {page_num} only returned {len(page_links)} links (expected ~25)")
                                 print(f"⚠ Agent may have stopped mid-task. Check logs/link_collection_*.log")
                         else:

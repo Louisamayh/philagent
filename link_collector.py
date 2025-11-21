@@ -28,6 +28,58 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def _read_extracted_content_files(page_number: int, current_page_url: str) -> Dict[str, Any]:
+    """
+    Fallback: Read links from extracted_content_*.md files that agent created
+    These files contain markdown tables with job links
+    """
+    import re
+    from pathlib import Path
+
+    all_links = []
+
+    # Try to find and read extracted_content files
+    for i in range(10):  # Check up to 10 files
+        file_path = Path(f"extracted_content_{i}.md")
+        if not file_path.exists():
+            break  # No more files
+
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            # Extract URL from content (looks for cv-library.co.uk/job/ links)
+            # Pattern matches both full URLs and relative paths
+            url_pattern = r'(?:https?://www\.cv-library\.co\.uk)?(/job/[\d]+/[^\s\|\)]+)'
+            matches = re.findall(url_pattern, content)
+
+            for match in matches:
+                # Convert relative path to full URL if needed
+                if match.startswith('/job/'):
+                    full_url = f"https://www.cv-library.co.uk{match}"
+                else:
+                    full_url = match
+
+                # Extract job title from the line (it's usually before the URL in markdown table)
+                # Pattern: | Job Title | URL |
+                title_match = re.search(rf'\|\s*([^|]+?)\s*\|\s*{re.escape(match)}', content)
+                title = title_match.group(1).strip() if title_match else "Unknown Title"
+
+                all_links.append({
+                    "page_number": page_number,
+                    "link_url": full_url,
+                    "link_text": title
+                })
+        except Exception as e:
+            logger.debug(f"Could not read {file_path}: {e}")
+            continue
+
+    return {
+        "current_page_url": current_page_url,
+        "links": all_links
+    }
+
+
 def _build_link_collection_task(base_url: str, job_title: str, location: str, miles: str, page_number: int, search_url: str = None) -> str:
     """
     Instructions for Phase 1: Collect job detail page links from ONE specific page
@@ -55,7 +107,7 @@ def _build_link_collection_task(base_url: str, job_title: str, location: str, mi
 4. You should now be on PAGE {page_number} of the search results."""
 
     return f"""
-You are a link collection agent. Your ONLY job is to collect job posting URLs from CV-Library search results.
+You are a link collection agent. Your ONLY job is to collect the top 5 job posting URLs from CV-Library search results.
 
 === YOUR TASK ===
 
@@ -74,24 +126,36 @@ STEPS:
 
 {navigation_instructions}
 
-4. COLLECT LINKS FROM THIS PAGE ONLY:
+4. VERIFY YOU'RE ON THE CORRECT PAGE:
+   - Check the URL or page indicator to confirm you're on PAGE {page_number}
+   - If not on the correct page, navigate there first
+   - Do NOT proceed until you're on the right page
+
+5. CHECK IF THIS PAGE EXISTS:
+   - Look for job results on the page
+   - Check for messages like "X-Y of Z total" to understand how many jobs exist
+   - If the page shows "0 jobs" or "no results", this page doesn't exist - return empty links immediately
+   - If you see job results, proceed with collection
+
+6. COLLECT ALL LINKS FROM THIS PAGE:
+   - Scroll down to the BOTTOM of the page first to load all content
+   - Typically 20-25 job cards per page (but last pages may have fewer)
    - Start from the TOP card
-   - For each job card (working DOWN the page):
+   - For EACH job card (working DOWN the page):
      * Locate the job title at the top of the card
      * The job title is a clickable link - extract its URL/href
      * Example URL format: "https://www.cv-library.co.uk/job/12345678/job-title-here"
      * Add this URL to your collection list
-   - Scroll down to see all job cards on THIS PAGE
-   - Typically 25 jobs per page
-   - Collect ALL links from PAGE {page_number} ONLY
+   - Collect EVERY job card visible on the page
 
-5. ALSO CAPTURE THE CURRENT PAGE URL:
-   - After collecting all links, note the current page URL (the search results page you're on)
+6. CAPTURE THE CURRENT PAGE URL:
+   - After collecting all links, note the current page URL
    - We'll need this URL to navigate to the next page
 
-6. IMPORTANT NOTES:
+7. CRITICAL REQUIREMENTS:
+   - You MUST have AT LEAST 15 links before returning (unless it's the last page with fewer jobs)
+   - Do NOT call done() until you have collected ALL links visible on the page
    - Do NOT visit the job detail pages yet
-   - ONLY collect the URLs/links from PAGE {page_number}
    - Do NOT scrape job information yet
    - Do NOT navigate to other pages
 
@@ -120,14 +184,24 @@ Example output:
     ]
 }}
 
-CRITICAL:
+CRITICAL RULES - READ CAREFULLY:
+- If the page shows 0 jobs or "no results", return empty links immediately: {{"current_page_url": "...", "links": []}}
+- Otherwise, collect ALL job cards visible on the page
+- Pages typically have 15-25 links (but last pages may have fewer - that's okay!)
 - Do NOT use write_file or any file operations
 - Keep ALL links in memory
-- Return as valid JSON
-- Do NOT visit job detail pages
+- Return as valid JSON with ALL collected links
+- Do NOT visit the job detail pages yet
 - ONLY collect from PAGE {page_number}
+- Collect EVERY job card visible - don't stop until you've scrolled through the entire page
 
-Your ONLY output should be that JSON object!
+BEFORE YOU CALL DONE:
+- Did you scroll through the ENTIRE page?
+- Did you extract EVERY job card you saw?
+- If page is empty/no results, return empty links
+- If page has jobs, return ALL of them (even if fewer than 15)
+
+Your ONLY output should be that JSON object with ALL links!
 """
 
 
@@ -205,6 +279,14 @@ async def collect_links_from_single_page(
         except Exception as e:
             logger.error(f"JSON parsing failed: {e}")
             logger.debug(f"Raw string (first 1000 chars): {result_json_str[:1000]}")
+
+            # FALLBACK: Try to read extracted_content files that agent created
+            logger.info("Attempting fallback: reading extracted_content files...")
+            fallback_links = _read_extracted_content_files(page_number, search_url or "")
+            if fallback_links["links"]:
+                logger.info(f"✓ Fallback successful! Found {len(fallback_links['links'])} links from extracted_content files")
+                return fallback_links
+
             return {"current_page_url": "", "links": []}
 
     # Validate result is a dict with required fields
