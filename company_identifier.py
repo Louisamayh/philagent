@@ -1,23 +1,3 @@
-"""
-Phase 3: Company Identifier (REBUILT TO MATCH HUMAN METHOD + NO-PEOPLE-NAMES SAFETY)
-
-UPDATED METHOD (Dynamic Industry + 2 Alternates):
-1) Infer PRIMARY industry + 2 plausible alternates (taxonomy-mapped; NEW if needed)
-2) Decide diagnosing terms for each industry candidate
-3) Search ONLY with diagnosing terms + location/postcode (3 targeted directions per industry + 1 unique clue search)
-4) Throw away hits that don't PROVE the industry (now checks unique clues)
-5) Merge evidence across candidates
-6) Let GPT extract + rank companies ONLY from merged evidence (now prioritizes unique clue match)
-7) Post-filter to remove any people names from outputs (safety + precision)
-
-Notes:
-- No broad "sector manufacturers Leicester" searches.
-- Deterministic booster kept, now feeds industry inference.
-- Geography scoring is radius-based.
-- Adds people-name redaction both BEFORE GPT (optional) and AFTER GPT (hard filter).
-- If advert suggests multi-site / UK travel: geo search radius loosened.
-"""
-
 import os
 import json
 import logging
@@ -52,19 +32,13 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 # ======================================================
-# 0) DYNAMIC INDUSTRY EXAMPLES (Reference Only - Not Constraining)
+# 0) DYNAMIC INDUSTRY EXAMPLES (Reference Only)
 # ======================================================
 # The system now dynamically infers industries from job content.
-# Examples of industries it can identify:
-# Manufacturing: CNC milling, sheet metal, toolmaking, press shop, food production
-# Tech: Software development, cloud infrastructure, data engineering, cybersecurity
-# Finance: Banking, fintech, insurance, trading
-# Services: Consulting, architecture, legal, healthcare
-# And any other industry based on the job description
 
 
 # ======================================================
-# 1) DYNAMIC SEARCH TERM EXTRACTION (REPLACES HARDCODED BOOSTER)
+# 1) DYNAMIC SEARCH TERM EXTRACTION
 # ======================================================
 def extract_dynamic_search_terms(job_description: str, job_title: str, clues: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -144,7 +118,7 @@ JOB DESCRIPTION:
 
 
 # ======================================================
-# 2) INDUSTRY INFERENCE (PRIMARY + 2 ALTERNATES)  (NEW)
+# 2) INDUSTRY INFERENCE (PRIMARY + 2 ALTERNATES)
 # ======================================================
 def infer_industry_candidates_with_gpt(clues: Dict[str, Any], job_description: str) -> Dict[str, Any]:
     """
@@ -157,8 +131,11 @@ def infer_industry_candidates_with_gpt(clues: Dict[str, Any], job_description: s
     }
     """
     deterministic_hint = None
+    explicit_sectors = []
+
     if isinstance(clues.get("sector_clues"), dict):
         deterministic_hint = clues["sector_clues"].get("manufacturing_type")
+        explicit_sectors = clues["sector_clues"].get("explicit_sectors") or []
 
     prompt = f"""
 You are classifying a UK recruiter advert into ONE main industry + TWO plausible alternates.
@@ -216,11 +193,12 @@ Rules:
 - DO NOT use generic terms - be specific to what the company does
 
 deterministic_hint: {deterministic_hint}
+explicit_sectors: {explicit_sectors}
 
 CLUES JSON:
 {json.dumps(clues, indent=2)}
 
-ADVERT:
+ADVERT (full job description):
 {job_description}
 """
 
@@ -237,25 +215,42 @@ ADVERT:
     if not isinstance(alternates, list):
         alternates = []
 
+    # --- NEW: sanity check using explicit sectors from clues ---
+    # If we have explicit sectors and GPT's primary doesn't resemble ANY of them,
+    # then don't trust that weird industry – fall back to the first explicit sector.
+    if explicit_sectors and primary:
+        if not any(es.lower() in primary.lower() or primary.lower() in es.lower()
+                   for es in explicit_sectors):
+            logger.warning(
+                f"⚠️ GPT primary '{primary}' does not match explicit sectors {explicit_sectors}. "
+                f"Falling back to first explicit sector."
+            )
+            primary = explicit_sectors[0]
+
+    # FIX: enforce manufacturing deterministic hint where available
+    if deterministic_hint:
+        dh = deterministic_hint.strip()
+        if dh and any(k in dh.lower() for k in ["manufactur", "fabrication", "production"]):
+            logger.info(f"✓ Overriding primary industry with deterministic manufacturing hint: {dh}")
+            primary = dh
+
     # Clean up alternates
     alternates = [a.strip() for a in alternates if isinstance(a, str) and a.strip()]
 
     # Smart fallback: if we need more alternates, create similar industry names
     fallback_alternates = []
     if len(alternates) < 2 and primary:
-        # Derive similar industry name from primary
         if "cnc" in primary.lower() or "machining" in primary.lower():
             fallback = "precision engineering services"
-        elif "software" in primary.lower() or "saas" in primary.lower() or "tech" in primary.lower():
+        elif any(x in primary.lower() for x in ["software", "saas", "tech"]):
             fallback = "technology services"
-        elif "manufacturing" in primary.lower() or "fabrication" in primary.lower():
+        elif any(x in primary.lower() for x in ["manufacturing", "fabrication"]):
             fallback = "engineering manufacturing"
-        elif "financial" in primary.lower() or "fintech" in primary.lower():
+        elif any(x in primary.lower() for x in ["financial", "fintech"]):
             fallback = "financial services"
-        elif "design" in primary.lower() or "consultancy" in primary.lower():
+        elif any(x in primary.lower() for x in ["design", "consultancy"]):
             fallback = "professional services"
         else:
-            # Generic fallback based on primary
             fallback = f"{primary.split()[0]} services" if primary else "related services"
 
         fallback_alternates.append(fallback)
@@ -270,20 +265,19 @@ ADVERT:
 
     alternates = alternates[:2]
 
-    # No taxonomy mapping - use GPT's industry labels directly
     if not primary:
         primary = "general services"
 
     return {
         "primary": primary,
         "alternates": alternates,
-        "created_new": False,  # No longer relevant
-        "new_label": None  # No longer relevant
+        "created_new": False,
+        "new_label": None
     }
 
 
 # ======================================================
-# 3) DYNAMIC SEARCH PARAMETER GENERATION (Replaces all hardcoded dictionaries)
+# 3) DYNAMIC SEARCH PARAMETER GENERATION
 # ======================================================
 def generate_search_parameters_for_industry(
     industry_name: str,
@@ -306,15 +300,17 @@ Based on the job description and clues, generate:
 1. **Diagnosing Search Terms** (3-5 terms): The most distinctive keywords that would appear on a company's website in this industry. Be SPECIFIC to this exact job.
    - Use actual brand names, equipment, software, certifications mentioned in the job
    - Examples: "Mazak CNC", "Salesforce CRM", "ISO 9001", "React", "AWS Lambda"
-   - Avoid generic terms unless nothing specific is available
+   - Avoid overly generic terms unless nothing specific is available
+   - ⚠️ If the industry is MANUFACTURING-related, ensure at least half the terms relate to PHYSICAL production (e.g., "factory", "shop floor", "cnc machining", "sheet metal fabrication") and not just ERP/software.
 
 2. **Evidence Keywords** (5-8 terms): Words/phrases that MUST appear in search results to confirm the company is in this industry
    - Lower case for matching
    - Examples: "cnc", "machining", "press brake", "saas platform", "fintech", "regulated"
+   - For manufacturing, include at least some of: "manufacturing", "factory", "production", "fabrication", "assembly".
 
 3. **Blacklist Terms** (3-5 terms): Industries/keywords to EXCLUDE from search results
    - Things that sound similar but are different industries
-   - Examples: For CNC machining, exclude "printing", "labels", "packaging"
+   - For manufacturing roles, EXCLUDE pure software/IT consulting hits where possible (e.g., "ERP consultancy", "implementation partner", "recruitment agency", "IT services") if that industry is not the target.
 
 INDUSTRY: {industry_name}
 
@@ -354,18 +350,37 @@ Return STRICT JSON:
             "blacklist_terms": []
         }
 
+
 # ======================================================
-# 4) EVIDENCE FILTER (Dynamic - no hardcoded dictionaries)
+# 4) EVIDENCE FILTER (Dynamic)
 # ======================================================
-def snippet_has_evidence(snippet: str, evidence_keywords: List[str], unique_clues: List[str]) -> bool:
+def snippet_has_evidence(
+    snippet: str,
+    evidence_keywords: List[str],
+    unique_clues: List[str],
+    require_manufacturing: bool = False
+) -> bool:
     """
     Dynamically checks if a search result snippet contains evidence keywords.
     Uses GPT-generated evidence keywords instead of hardcoded dictionary.
+
+    FIX: If require_manufacturing=True, enforce that text clearly refers to
+    manufacturing/factory/production, not just ERP/software/consulting.
     """
     if not snippet:
         return False
 
     txt = snippet.lower()
+
+    # If this role clearly requires a manufacturer, enforce manufacturing words
+    if require_manufacturing:
+        manuf_words = [
+            "manufactur", "factory", "shop floor", "fabrication", "fabricator",
+            "cnc", "press brake", "laser cutting", "moulding", "production line",
+            "assembly", "sheet metal", "welding", "machinery", "plant"
+        ]
+        if not any(w in txt for w in manuf_words):
+            return False
 
     # Priority 1: Match against job-specific unique clues (brands, specific equipment)
     if unique_clues and any(uc.lower() in txt for uc in unique_clues):
@@ -380,7 +395,7 @@ def snippet_has_evidence(snippet: str, evidence_keywords: List[str], unique_clue
 
 
 # ======================================================
-# 5) NO-PEOPLE-NAMES FILTERS (kept)
+# 5) NO-PEOPLE-NAMES FILTERS
 # ======================================================
 LEGAL_SUFFIX_RE = re.compile(
     r"(ltd|limited|plc|llp|inc|group|engineering|manufacturing|systems|fabrications|services|company|co\.?)",
@@ -428,7 +443,7 @@ def filter_out_people_candidates(candidates: List[Dict[str, Any]]) -> List[Dict[
 
 
 # ======================================================
-# 6) TARGETED SEARCH (Dynamic - uses GPT-generated parameters)
+# 6) TARGETED SEARCH
 # ======================================================
 def targeted_search(
     location: str,
@@ -442,7 +457,7 @@ def targeted_search(
     Performs targeted web searches using dynamically generated search parameters.
     """
     if multi_site:
-        geo = f"{location} Midlands UK".strip()
+        geo = f"{location} Midlands".strip()
     else:
         geo = f"{location} {postcode}".strip()
 
@@ -458,7 +473,7 @@ def targeted_search(
     qB = f"\"{industry_name}\" {geo} {exclude_terms}".strip()
     qC = f"{diagnosing_terms[0]} {diagnosing_terms[-1]} {geo} {exclude_terms}".strip() if len(diagnosing_terms) > 1 else qA
 
-    # Unique clue query: Forces search engine to match specific brands + location
+    # Unique clue query
     unique_clue_term = " ".join(unique_clues[:2])
     qD = f"\"{unique_clue_term}\" \"{industry_name}\" {geo} {exclude_terms}".strip() if unique_clue_term else ""
 
@@ -475,8 +490,8 @@ def targeted_search(
             for res in r.get("results", []):
                 res["_query"] = q
                 res["_industry"] = industry_name
-                res["_evidence_keywords"] = evidence_keywords  # Store for filtering
-                res["_unique_clues"] = unique_clues  # Store for filtering
+                res["_evidence_keywords"] = evidence_keywords
+                res["_unique_clues"] = unique_clues
                 all_results.append(res)
         except Exception as e:
             logger.error(f"Search failed for query '{q}': {e}")
@@ -484,11 +499,12 @@ def targeted_search(
     return all_results
 
 
-# FIX 2: Updated format_and_filter_results to use unique_clues in the filter
 def format_and_filter_results(raw_results: List[Dict[str, Any]]) -> str:
     """
     Evidence filter per-result using that result's industry tag and unique clues.
     Redacts people names.
+
+    FIX: Use require_manufacturing based on industry_name.
     """
     filtered = []
     seen_urls = set()
@@ -498,15 +514,19 @@ def format_and_filter_results(raw_results: List[Dict[str, Any]]) -> str:
         snippet = (res.get("content") or "")[:800]
         industry_name = res.get("_industry", "Unknown")
 
-        # Get dynamically generated evidence keywords and unique clues for this result
+        # Dynamically derive if manufacturing evidence is required
+        require_manufacturing = any(
+            k in industry_name.lower()
+            for k in ["manufactur", "fabrication", "production", "cnc", "sheet metal"]
+        )
+
         evidence_keywords = res.get("_evidence_keywords", [])
         unique_clues = res.get("_unique_clues", [])
 
         if not url or url in seen_urls:
             continue
 
-        # Use dynamic evidence filter
-        if snippet_has_evidence(snippet, evidence_keywords, unique_clues):
+        if snippet_has_evidence(snippet, evidence_keywords, unique_clues, require_manufacturing=require_manufacturing):
             res["content"] = redact_people_from_text(res.get("content", ""))
             filtered.append(res)
             seen_urls.add(url)
@@ -525,7 +545,7 @@ def format_and_filter_results(raw_results: List[Dict[str, Any]]) -> str:
 
 
 # ======================================================
-# 7) VERIFICATION (kept)
+# 7) VERIFICATION
 # ======================================================
 def verify_company(company_name: str, location: str, postcode: str, job_title: str, machinery: str) -> str:
     all_results = f"## Verification for: {company_name}\n\n"
@@ -565,7 +585,7 @@ def verify_company(company_name: str, location: str, postcode: str, job_title: s
 
 
 # ======================================================
-# 8) CLUE EXTRACTION (kept + booster)
+# 8) CLUE EXTRACTION
 # ======================================================
 def extract_clues_from_job(job_description: str, job_title: str, location: str) -> Dict[str, Any]:
     logger.info(f"Extracting clues from job: {job_title} in {location}")
@@ -658,29 +678,60 @@ FULL JOB DESCRIPTION:
 
 
 # ======================================================
-# 9) COMPANY IDENTIFICATION (rewired to multi-industry)
+# Helper: detect physical machinery terms
+# ======================================================
+def _is_physical_machinery_term(term: str) -> bool:
+    if not term:
+        return False
+    t = term.lower()
+    physical_markers = [
+        "cnc", "press", "laser", "lathe", "milling", "mill", "turning",
+        "weld", "welding", "brake", "shear", "punch", "mould", "molding",
+        "robot", "robotic", "production line", "conveyor", "machine",
+        "extrusion", "injection", "casting"
+    ]
+    return any(m in t for m in physical_markers)
+
+
+# ======================================================
+# Helper: outward postcode extraction for geography filter
+# ======================================================
+def _extract_outward_postcode(pc: str) -> str:
+    """
+    Extract outward code (e.g. 'LE4' from 'LE4 9EU').
+    Returns '' if invalid or not usable.
+    """
+    if not pc:
+        return ""
+    pc = pc.strip().upper()
+    # Very lightweight: outward code is first token
+    return pc.split()[0]
+
+
+# ======================================================
+# 9) COMPANY IDENTIFICATION
 # ======================================================
 def identify_potential_companies(
     clues: Dict[str, Any],
     job_title: str,
     location: str,
     recruiter_name: str,
-    postcode: str = ""
+    postcode: str = "",
+    full_job_description: str = ""
 ) -> Dict[str, Any]:
 
     logger.info(f"Identifying potential companies for: {job_title}")
 
     machinery_clues = clues.get("machinery_clues", []) if clues else []
-    software_clues = clues.get("software_clues", []) if clues else [] # Added
-    
-    # Combine machinery and software for a single list of unique clues for search/filter
+    software_clues = clues.get("software_clues", []) if clues else []
+
     unique_clues = list(set(machinery_clues + software_clues))
 
     location_clues = clues.get("location_clues", {}) if clues else {}
     multi_site = bool(location_clues.get("multi_site", False)) if isinstance(location_clues, dict) else False
 
-    # (1) Infer PRIMARY + 2 alternates
-    industry_guess = infer_industry_candidates_with_gpt(clues, clues.get("summary_narrative", ""))
+    # (1) Infer PRIMARY + 2 alternates, using FULL job description (FIX)
+    industry_guess = infer_industry_candidates_with_gpt(clues, full_job_description or clues.get("summary_narrative", ""))
     primary_type = industry_guess["primary"]
     alt_types = industry_guess["alternates"]
 
@@ -690,7 +741,7 @@ def identify_potential_companies(
     industry_candidates = [primary_type] + alt_types
 
     # (2) Generate dynamic search parameters for each industry candidate
-    job_description_text = clues.get("summary_narrative", "")
+    job_description_text = full_job_description or clues.get("summary_narrative", "")
     search_params_by_industry = {}
 
     for industry in industry_candidates:
@@ -718,11 +769,13 @@ def identify_potential_companies(
         )
 
     # (4) Evidence filter BEFORE GPT (merged)
-    # FIX 2: format_and_filter_results now uses the unique_clues stored in raw_results_all
     filtered_search_text = format_and_filter_results(raw_results_all)
-    primary_machinery = machinery_clues[0] if machinery_clues else ""
 
-    # FIX 3: Modified system_prompt to include and prioritize unique_clue_match score
+    # FIX: choose primary_machinery only from clearly physical terms
+    physical_machinery_terms = [t for t in machinery_clues if _is_physical_machinery_term(t)]
+    primary_machinery = physical_machinery_terms[0] if physical_machinery_terms else ""
+
+    # (5) Ranking / classification
     system_prompt = f"""
 You are an expert in UK industrial geography, manufacturing, and recruitment.
 
@@ -732,21 +785,42 @@ CRITICAL:
 - You may ONLY use companies that appear in the FILTERED search results.
 - NEVER return individual people names. Only legal entities / companies.
 
+JOB CONTEXT:
+- Many of these roles are in PHYSICAL MANUFACTURING environments (factory, shop floor, machines, production lines).
+- When the primary industry is manufacturing-like, you MUST distinguish between:
+  (a) Companies that actually MAKE physical products (manufacturers)
+  (b) Companies that only provide software/services/consulting to manufacturers (ERP providers, IT consultancies, recruitment agencies, etc.)
+
+PRIMARY INDUSTRY: {primary_type}
+ALTERNATE INDUSTRIES: {alt_types}
+
+If the job clearly involves factories, production lines, machinery, or shop floors, you MUST:
+- Treat non-manufacturers (pure software, ERP consultancy, IT services, recruitment, accountancy) as LOW CONFIDENCE.
+- Set is_manufacturer=false and makes_physical_products=false for these.
+- They should only appear if there is absolutely no plausible manufacturer at all.
+
 PROCESS:
 1) Extract ALL company names from the search results. Ignore people.
 2) Pull any address/postcode evidence present.
-3) ⚠️ PRIMARY INDUSTRY PRIORITIZATION:
+3) Classify for each company:
+   - "is_manufacturer": true/false
+   - "makes_physical_products": true/false
+4) PRIORITY:
    - STRONGLY prefer companies from PRIMARY industry: {primary_type}
    - Only consider ALTERNATE industries if NO good matches in primary
    - If a company is from an alternate industry, it MUST have exceptional evidence (unique clue match + geography + clear sector fit) to rank highly
    - Add +10 bonus points to total_score for PRIMARY industry matches
-4) CRITICALLY: Score match based on unique clues (like {', '.join(unique_clues[:3]) if unique_clues else 'Amada, Hurco, etc.'}) over generic sector/salary matches. A company matching a unique clue MUST score maximum points in the 'unique_clue_match' category.
-5) Score using radius-based geography:
+5) CRITICALLY: Score match based on unique clues (like {', '.join(unique_clues[:3]) if unique_clues else 'Amada, Hurco, etc.'}) over generic sector/salary matches. A company matching a unique clue MUST score maximum points in the 'unique_clue_match' category.
+6) Score geography (radius-based):
    - Exact inward+outward = 10
    - Same outward code = 8
    - Adjacent outward code = 6
    - Same county/cluster = 4
    - Else = 0
+7) GEOGRAPHY HARD RULE:
+   - The job is located in or around: {location} (postcode: {postcode})
+   - If a company is clearly based in a completely different area, its confidence MUST be 0 and it MUST NOT appear in potential_companies at all.
+   - If you cannot find any suitable companies in this area, return an empty potential_companies list.
 
 Return STRICT JSON:
 
@@ -762,6 +836,8 @@ Return STRICT JSON:
       "company_postcode": "LE3 1TU or null",
       "postcode_matches_job": false,
       "location_verified": "Town",
+      "is_manufacturer": true,
+      "makes_physical_products": true,
       "confidence": 0.85,
       "total_score": 71,
       "score_breakdown": {{
@@ -775,15 +851,14 @@ Return STRICT JSON:
         "primary_industry_bonus": 10
       }},
       "source_search_result": "Result #3",
-      "industry_source": "PRIMARY (industrial services) or ALTERNATE (LEV)",
-      "reasoning": "Start with evidence + location match. Crucially, their website explicitly mentions the use of {primary_machinery}. Add +10 if from PRIMARY industry."
+      "industry_source": "PRIMARY (manufacturing) or ALTERNATE (services/tech)",
+      "reasoning": "Evidence + location match. Their website explicitly states they manufacture products in {primary_type}. +10 for primary industry."
     }}
   ],
   "analysis_summary": "Process summary"
 }}
 """
 
-    # Format search parameters for display
     search_params_summary = {}
     for industry, params in search_params_by_industry.items():
         search_params_summary[industry] = params.get("diagnosing_terms", [])
@@ -821,7 +896,7 @@ Identify and rank the most likely actual hiring companies.
         )
         result = json.loads(response.choices[0].message.content)
 
-        # (5) Optional verify top 3 then re-rank
+        # (5b) Optional verify top 3 then re-rank
         top3 = result.get("potential_companies", [])[:3]
         if top3:
             verification_text = ""
@@ -843,9 +918,55 @@ Identify and rank the most likely actual hiring companies.
         # (6) HARD post-filter to remove any people names
         pcs = result.get("potential_companies", [])
         pcs = filter_out_people_candidates(pcs)
+
+        # NEW: HARD FILTER non-manufacturers if primary industry is manufacturing-ish
+        primary_is_manufacturing = any(
+            k in primary_type.lower() for k in ["manufactur", "fabrication", "production", "cnc", "sheet metal"]
+        )
+        if primary_is_manufacturing:
+            before_count = len(pcs)
+            pcs = [
+                c for c in pcs
+                if c.get("is_manufacturer") is True or c.get("makes_physical_products") is True
+            ]
+            logger.info(
+                f"✓ Manufacturing hard-filter removed {before_count - len(pcs)} non-manufacturer candidates "
+                f"for manufacturing role."
+            )
+
+        # --- NEW: GEOGRAPHY HARD FILTER ---
+        job_outward = _extract_outward_postcode(postcode)
+        primary_town = ""
+        if isinstance(location_clues, dict):
+            primary_town = (location_clues.get("primary_town") or "").strip().lower()
+
+        if pcs:
+            before_geo = len(pcs)
+            geo_filtered: List[Dict[str, Any]] = []
+            for c in pcs:
+                company_pc = (c.get("company_postcode") or "").strip()
+                company_outward = _extract_outward_postcode(company_pc)
+                company_loc = (c.get("location_verified") or "").strip().lower()
+
+                # Rule:
+                # 1) If we have both job_outward and company_outward → require equality
+                # 2) Else if we have primary_town → require town match
+                if job_outward and company_outward:
+                    if company_outward == job_outward:
+                        geo_filtered.append(c)
+                elif primary_town:
+                    if company_loc and primary_town in company_loc:
+                        geo_filtered.append(c)
+
+            pcs = geo_filtered
+            logger.info(
+                f"✓ Geography hard-filter removed {before_geo - len(pcs)} candidates "
+                f"for job postcode='{postcode}' / town='{primary_town}'"
+            )
+
         result["potential_companies"] = pcs
 
-        logger.info(f"✓ Identified {len(pcs)} potential companies after people-filter")
+        logger.info(f"✓ Identified {len(pcs)} potential companies after filters")
         for idx, c in enumerate(pcs, 1):
             logger.info(f"  #{idx}: {c.get('company_name')} ({c.get('confidence', 0)*100:.0f}%)")
 
@@ -857,7 +978,7 @@ Identify and rank the most likely actual hiring companies.
 
 
 # ======================================================
-# 10) ENRICHMENT (kept)
+# 10) ENRICHMENT
 # ======================================================
 async def enrich_posting_with_company_id(posting: Dict[str, Any]) -> Dict[str, Any]:
     job_id = posting.get("job_id", "UNKNOWN")
@@ -876,7 +997,12 @@ async def enrich_posting_with_company_id(posting: Dict[str, Any]) -> Dict[str, A
         postcode = clues["location_clues"].get("postcode", "") or ""
 
     identification_result = identify_potential_companies(
-        clues, job_title, location, recruiter_name, postcode
+        clues=clues,
+        job_title=job_title,
+        location=location,
+        recruiter_name=recruiter_name,
+        postcode=postcode,
+        full_job_description=full_description  # FIX: pass full job description down
     )
 
     potential_companies = identification_result.get("potential_companies", [])
