@@ -1,0 +1,664 @@
+2025-11-21 17:28:53,115 - INFO - ============================================================
+2025-11-21 17:28:53,115 - INFO - Processing job_id=60d80dc1-8bf7-4708-909b-ee46d2df8da6: Panel Wirer
+2025-11-21 17:28:53,115 - INFO - Extracting clues from job: Panel Wirer in Leicester, LE8
+2025-11-21 17:28:59,775 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:28:59,788 - INFO - ✓ Extracted clues for job: Panel Wirer
+2025-11-21 17:28:59,789 - INFO - Identifying potential companies for: Panel Wirer
+2025-11-21 17:28:59,789 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:28:59,789 - INFO - 🔍 Stage 1 (Ultra-specific tech): control panels machine wiring Leicester, LE8 LE8
+2025-11-21 17:29:00,127 - INFO - 🔍 Stage 2 (Job-specific): "panel wirer" OR "Machine Building Industry" companies Leicester, LE8 LE8
+2025-11-21 17:29:00,459 - INFO - 🔍 Stage 3 (Sector): Machine Building Industry manufacturers Leicester, LE8 LE8
+2025-11-21 17:29:00,791 - INFO - 🔍 Stage 4 (Official): companies LE8 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:29:01,117 - INFO - ✓ Completed 4-stage search, found 31 total results
+2025-11-21 17:29:18,198 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:29:18,204 - INFO - ✓ Industrial Cluster: Leicester, LE8 → Machine Building Industry
+2025-11-21 17:29:18,204 - INFO - ✓ Identified 3 potential companies
+2025-11-21 17:29:18,205 - INFO -   #1: Cord Controls Ltd | Postcode: LE8 5RP ✓ | Score: 54/60 (90%)
+2025-11-21 17:29:18,205 - INFO -   #2: Select Switchgear & Control | Postcode: None ✗ | Score: 42/60 (70%)
+2025-11-21 17:29:18,205 - INFO -   #3: Midland Handling Equipment Industry | Postcode: LE8 9GN ✓ | Score: 42/60 (70%)
+2025-11-21 17:29:18,205 - INFO - ✓ Completed: Cord Controls Ltd (90% confidence)
+2025-11-21 17:29:19,206 - INFO - ============================================================
+2025-11-21 17:29:19,207 - INFO - Processing job_id=2c5828cd-98b5-4099-b08d-d4df0752d4de: General Operative /site labourer
+2025-11-21 17:29:19,207 - INFO - Extracting clues from job: General Operative /site labourer in Glenfield, Leicester LE3 6NW
+2025-11-21 17:29:24,458 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:29:24,465 - INFO - ✓ Extracted clues for job: General Operative /site labourer
+2025-11-21 17:29:24,465 - INFO - Identifying potential companies for: General Operative /site labourer
+2025-11-21 17:29:24,465 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:29:24,465 - INFO - 🔍 Stage 2 (Job-specific): "general operative /site labourer" OR "" companies Glenfield, Leicester LE3 6NW LE3 6NW
+2025-11-21 17:29:24,776 - INFO - 🔍 Stage 4 (Official): companies LE3 6NW manufacturing site:companieshouse.gov.uk
+2025-11-21 17:29:25,093 - INFO - ✓ Completed 4-stage search, found 3 total results
+2025-11-21 17:29:29,280 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:29:29,282 - INFO - ✓ Industrial Cluster: Glenfield, Leicester → 
+2025-11-21 17:29:29,282 - INFO - ✓ Identified 0 potential companies
+2025-11-21 17:29:29,283 - INFO - ✓ Completed:  (0% confidence)
+2025-11-21 17:29:30,283 - INFO - ============================================================
+2025-11-21 17:29:30,283 - INFO - Processing job_id=7149e19e-c40e-4279-88e1-57bf16cb8942: Work Shop supervisor
+2025-11-21 17:29:30,284 - INFO - Extracting clues from job: Work Shop supervisor in Leicester
+2025-11-21 17:29:36,385 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:29:36,391 - INFO - ✓ Extracted clues for job: Work Shop supervisor
+2025-11-21 17:29:36,391 - INFO - Identifying potential companies for: Work Shop supervisor
+2025-11-21 17:29:36,391 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:29:36,391 - INFO - 🔍 Stage 1 (Ultra-specific tech): Amada machinery laser cutting Leicester LE3
+2025-11-21 17:29:36,707 - INFO - 🔍 Stage 1B (Mfg type): "Fabrication" subcontract Leicester LE3
+2025-11-21 17:29:37,015 - INFO - 🔍 Stage 2 (Job-specific): "work shop supervisor" OR "Engineering Manufacturing" companies Leicester LE3
+2025-11-21 17:29:37,330 - INFO - 🔍 Stage 3 (Sector): Engineering Manufacturing manufacturers Leicester LE3
+2025-11-21 17:29:37,650 - INFO - 🔍 Stage 4 (Official): companies LE3 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:29:37,937 - INFO - ✓ Completed 4-stage search, found 31 total results
+2025-11-21 17:29:51,381 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:29:51,388 - INFO - ✓ Industrial Cluster: Leicester → Engineering Manufacturing, Fabrication, Metal Sheet Fabrication
+2025-11-21 17:29:51,389 - INFO - ✓ Identified 3 potential companies
+2025-11-21 17:29:51,389 - INFO -   #1: AVW Fabrications Limited | Postcode: LE3 ✓ | Score: 55/60 (91%)
+2025-11-21 17:29:51,389 - INFO -   #2: Waygate Engineering Ltd | Postcode: LE3 ✓ | Score: 51/60 (85%)
+2025-11-21 17:29:51,389 - INFO -   #3: Glenborough Engineering Co Ltd | Postcode: LE3 8BT ✓ | Score: 48/60 (80%)
+2025-11-21 17:29:51,392 - INFO - ✓ Completed: AVW Fabrications Limited (91% confidence)
+2025-11-21 17:29:52,393 - INFO - ============================================================
+2025-11-21 17:29:52,393 - INFO - Processing job_id=cffc2efa-0233-442a-97dc-873d902125f1: CNC Setter / Operator
+2025-11-21 17:29:52,393 - INFO - Extracting clues from job: CNC Setter / Operator in Leicester, Leicestershire (LE4)
+2025-11-21 17:30:02,068 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:30:02,081 - INFO - ✓ Extracted clues for job: CNC Setter / Operator
+2025-11-21 17:30:02,081 - INFO - Identifying potential companies for: CNC Setter / Operator
+2025-11-21 17:30:02,081 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:30:02,081 - INFO - 🔍 Stage 1 (Ultra-specific tech): CNC Milling Machine Mazak Controls Leicester, Leicestershire (LE4) LE4
+2025-11-21 17:30:03,541 - INFO - 🔍 Stage 1B (Mfg type): "CNC machining" subcontract Leicester, Leicestershire (LE4) LE4
+2025-11-21 17:30:05,102 - INFO - 🔍 Stage 2 (Job-specific): "cnc setter / operator" OR "engineering" companies Leicester, Leicestershire (LE4) LE4
+2025-11-21 17:30:06,443 - INFO - 🔍 Stage 3 (Sector): engineering manufacturers Leicester, Leicestershire (LE4) LE4
+2025-11-21 17:30:08,218 - INFO - 🔍 Stage 4 (Official): companies LE4 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:30:08,505 - INFO - ✓ Completed 4-stage search, found 31 total results
+2025-11-21 17:30:24,424 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:30:24,426 - INFO - ✓ Industrial Cluster: Leicester, Leicestershire (LE4) → Engineering, Manufacturing, CNC Machining
+2025-11-21 17:30:24,426 - INFO - ✓ Identified 3 potential companies
+2025-11-21 17:30:24,426 - INFO -   #1: CNC Leicester Ltd | Postcode: LE4 9JE ✓ | Score: 55/60 (92%)
+2025-11-21 17:30:24,427 - INFO -   #2: Superturn Engineering Ltd | Postcode: LE4 9JE ✓ | Score: 54/60 (90%)
+2025-11-21 17:30:24,427 - INFO -   #3: Kaby Engineers Ltd | Postcode: Not explicitly stated - near city center Leicester ✗ | Score: 48/60 (80%)
+2025-11-21 17:30:24,427 - INFO - ✓ Completed: CNC Leicester Ltd (92% confidence)
+2025-11-21 17:30:25,428 - INFO - ============================================================
+2025-11-21 17:30:25,429 - INFO - Processing job_id=8a19ac41-9b10-424b-8ab4-cf4b3fef345a: CNC setter / operator
+2025-11-21 17:30:25,429 - INFO - Extracting clues from job: CNC setter / operator in Leicester, Leicestershire (LE4 area)
+2025-11-21 17:30:34,160 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:30:34,165 - INFO - ✓ Extracted clues for job: CNC setter / operator
+2025-11-21 17:30:34,165 - INFO - Identifying potential companies for: CNC setter / operator
+2025-11-21 17:30:34,165 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:30:34,165 - INFO - 🔍 Stage 1 (Ultra-specific tech): CNC Milling Machine Mazak Controls Leicester, Leicestershire (LE4 area) LE4
+2025-11-21 17:30:34,502 - INFO - 🔍 Stage 1B (Mfg type): "CNC Milling Machining" subcontract Leicester, Leicestershire (LE4 area) LE4
+2025-11-21 17:30:35,709 - INFO - 🔍 Stage 2 (Job-specific): "cnc setter / operator" OR "Manufacturing" companies Leicester, Leicestershire (LE4 area) LE4
+2025-11-21 17:30:37,331 - INFO - 🔍 Stage 3 (Sector): Manufacturing manufacturers Leicester, Leicestershire (LE4 area) LE4
+2025-11-21 17:30:38,862 - INFO - 🔍 Stage 4 (Official): companies LE4 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:30:39,144 - INFO - ✓ Completed 4-stage search, found 31 total results
+2025-11-21 17:31:01,957 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:31:01,966 - INFO - ✓ Industrial Cluster: Leicester, Leicestershire (LE4 area) → CNC Milling, Manufacturing, Engineering
+2025-11-21 17:31:01,966 - INFO - ✓ Identified 3 potential companies
+2025-11-21 17:31:01,967 - INFO -   #1: CNC Leicester Ltd | Postcode: LE4 9JE ✓ | Score: 58/60 (97%)
+2025-11-21 17:31:01,967 - INFO -   #2: LB Foster Materials Handling | Postcode: LE4 9HU ✓ | Score: 51/60 (85%)
+2025-11-21 17:31:01,967 - INFO -   #3: Springfield Pressings Limited | Postcode: LE4 9LE ✓ | Score: 48/60 (80%)
+2025-11-21 17:31:01,967 - INFO - ✓ Completed: CNC Leicester Ltd (97% confidence)
+2025-11-21 17:31:02,968 - INFO - ============================================================
+2025-11-21 17:31:02,968 - INFO - Processing job_id=e9bdb780-7c15-4b4c-8429-03d283d76fe5: CNC Setter / operator
+2025-11-21 17:31:02,968 - INFO - Extracting clues from job: CNC Setter / operator in Leicester, LE4
+2025-11-21 17:31:09,890 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:31:09,892 - INFO - ✓ Extracted clues for job: CNC Setter / operator
+2025-11-21 17:31:09,892 - INFO - Identifying potential companies for: CNC Setter / operator
+2025-11-21 17:31:09,892 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:31:09,893 - INFO - 🔍 Stage 1 (Ultra-specific tech): CNC Milling CNC Turning Leicester, LE4 LE4
+2025-11-21 17:31:10,211 - INFO - 🔍 Stage 1B (Mfg type): "CNC machining" subcontract Leicester, LE4 LE4
+2025-11-21 17:31:11,536 - INFO - 🔍 Stage 2 (Job-specific): "cnc setter / operator" OR "engineering" companies Leicester, LE4 LE4
+2025-11-21 17:31:11,818 - INFO - 🔍 Stage 3 (Sector): engineering manufacturers Leicester, LE4 LE4
+2025-11-21 17:31:12,106 - INFO - 🔍 Stage 4 (Official): companies LE4 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:31:12,386 - INFO - ✓ Completed 4-stage search, found 31 total results
+2025-11-21 17:31:25,250 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:31:25,251 - INFO - ✓ Industrial Cluster: Leicester, LE4 → CNC Machining, Engineering, Manufacturing
+2025-11-21 17:31:25,252 - INFO - ✓ Identified 3 potential companies
+2025-11-21 17:31:25,252 - INFO -   #1: CNC Leicester Ltd | Postcode: LE4 9JE ✓ | Score: 54/60 (90%)
+2025-11-21 17:31:25,252 - INFO -   #2: SUPERTURN | Postcode: LE4 9JE ✓ | Score: 51/60 (85%)
+2025-11-21 17:31:25,252 - INFO -   #3: M S A Engineering Systems Ltd | Postcode: LE4 8BB ✓ | Score: 48/60 (80%)
+2025-11-21 17:31:25,252 - INFO - ✓ Completed: CNC Leicester Ltd (90% confidence)
+2025-11-21 17:31:26,254 - INFO - ============================================================
+2025-11-21 17:31:26,254 - INFO - Processing job_id=c058689e-be5e-4128-a3c6-545e0406b0c3: Welder
+2025-11-21 17:31:26,254 - INFO - Extracting clues from job: Welder in Leicester LE4
+2025-11-21 17:31:33,620 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:31:33,626 - INFO - ✓ Extracted clues for job: Welder
+2025-11-21 17:31:33,626 - INFO - Identifying potential companies for: Welder
+2025-11-21 17:31:33,626 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:31:33,626 - INFO - 🔍 Stage 1 (Ultra-specific tech): MIG welding fabrication Leicester LE4 LE4
+2025-11-21 17:31:35,237 - INFO - 🔍 Stage 1B (Mfg type): "metal fabrication" subcontract Leicester LE4 LE4
+2025-11-21 17:31:36,866 - INFO - 🔍 Stage 2 (Job-specific): "welder" OR "engineering" companies Leicester LE4 LE4
+2025-11-21 17:31:37,150 - INFO - 🔍 Stage 3 (Sector): engineering manufacturers Leicester LE4 LE4
+2025-11-21 17:31:37,433 - INFO - 🔍 Stage 4 (Official): companies LE4 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:31:37,718 - INFO - ✓ Completed 4-stage search, found 31 total results
+2025-11-21 17:31:51,670 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:31:51,672 - INFO - ✓ Industrial Cluster: Leicester LE4 → engineering, fabrication, metal fabrication
+2025-11-21 17:31:51,672 - INFO - ✓ Identified 3 potential companies
+2025-11-21 17:31:51,672 - INFO -   #1: Springfield Pressings Ltd | Postcode: LE4 9LE ✓ | Score: 54/60 (90%)
+2025-11-21 17:31:51,672 - INFO -   #2: Tooling Units (Leicester) Ltd | Postcode: verify through gov.uk ✗ | Score: 48/60 (80%)
+2025-11-21 17:31:51,672 - INFO -   #3: Waygate Engineering Ltd | Postcode: LE4 location assumed, verify for confirmation ✗ | Score: 46/60 (76%)
+2025-11-21 17:31:51,672 - INFO - ✓ Completed: Springfield Pressings Ltd (90% confidence)
+2025-11-21 17:31:52,674 - INFO - ============================================================
+2025-11-21 17:31:52,674 - INFO - Processing job_id=05a1c8b9-6da9-4f33-a9aa-71f5d4500ebe: General op with FLT licence
+2025-11-21 17:31:52,675 - INFO - Extracting clues from job: General op with FLT licence in Leicester LE3
+2025-11-21 17:32:16,454 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:32:16,456 - INFO - ✓ Extracted clues for job: General op with FLT licence
+2025-11-21 17:32:16,456 - INFO - Identifying potential companies for: General op with FLT licence
+2025-11-21 17:32:16,456 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:32:16,456 - INFO - 🔍 Stage 1 (Ultra-specific tech): FLT Leicester LE3 LE3
+2025-11-21 17:32:17,788 - INFO - 🔍 Stage 2 (Job-specific): "general op with flt licence" OR "engineering" companies Leicester LE3 LE3
+2025-11-21 17:32:18,079 - INFO - 🔍 Stage 3 (Sector): engineering manufacturers Leicester LE3 LE3
+2025-11-21 17:32:18,365 - INFO - 🔍 Stage 4 (Official): companies LE3 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:32:18,647 - INFO - ✓ Completed 4-stage search, found 31 total results
+2025-11-21 17:32:31,069 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:32:31,075 - INFO - ✓ Industrial Cluster: Leicester LE3 → Engineering, Manufacturing
+2025-11-21 17:32:31,075 - INFO - ✓ Identified 3 potential companies
+2025-11-21 17:32:31,076 - INFO -   #1: Leicester Forklifts Limited | Postcode: LE3 2XD ✓ | Score: 55/60 (92%)
+2025-11-21 17:32:31,076 - INFO -   #2: Rieke Manufacturing UK Limited | Postcode: LE3 1UG ✓ | Score: 54/60 (90%)
+2025-11-21 17:32:31,076 - INFO -   #3: Glenborough Engineering Co Ltd. | Postcode: LE3 8BT ✓ | Score: 51/60 (85%)
+2025-11-21 17:32:31,077 - INFO - ✓ Completed: Leicester Forklifts Limited (92% confidence)
+2025-11-21 17:32:32,078 - INFO - ============================================================
+2025-11-21 17:32:32,079 - INFO - Processing job_id=39250bcc-417b-4f30-b447-2492af6b6c1e: Welder
+2025-11-21 17:32:32,079 - INFO - Extracting clues from job: Welder in Oadby, Leicester LE2
+2025-11-21 17:32:40,080 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:32:40,090 - INFO - ✓ Extracted clues for job: Welder
+2025-11-21 17:32:40,090 - INFO - Identifying potential companies for: Welder
+2025-11-21 17:32:40,090 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:32:40,091 - INFO - 🔍 Stage 1 (Ultra-specific tech): CNC Laser CNC Press brake Oadby, Leicester LE2 LE2
+2025-11-21 17:32:40,381 - INFO - 🔍 Stage 1B (Mfg type): "metal fabrication" subcontract Oadby, Leicester LE2 LE2
+2025-11-21 17:32:41,852 - INFO - 🔍 Stage 2 (Job-specific): "welder" OR "engineering" companies Oadby, Leicester LE2 LE2
+2025-11-21 17:32:42,141 - INFO - 🔍 Stage 3 (Sector): engineering manufacturers Oadby, Leicester LE2 LE2
+2025-11-21 17:32:42,420 - INFO - 🔍 Stage 4 (Official): companies LE2 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:32:42,704 - INFO - ✓ Completed 4-stage search, found 31 total results
+2025-11-21 17:32:55,014 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:32:55,015 - INFO - ✓ Industrial Cluster: Oadby, Leicester LE2 → Metal Fabrication, Engineering
+2025-11-21 17:32:55,016 - INFO - ✓ Identified 3 potential companies
+2025-11-21 17:32:55,016 - INFO -   #1: Paton Precision Engineering Ltd | Postcode: LE2 5LT ✓ | Score: 54/60 (90%)
+2025-11-21 17:32:55,016 - INFO -   #2: Meadows Engineering & Patterns | Postcode: LE2 5LT ✓ | Score: 52/60 (87%)
+2025-11-21 17:32:55,016 - INFO -   #3: CGP Engineering Ltd | Postcode: LE2 4DD ✓ | Score: 50/60 (85%)
+2025-11-21 17:32:55,016 - INFO - ✓ Completed: Paton Precision Engineering Ltd (90% confidence)
+2025-11-21 17:32:56,018 - INFO - ============================================================
+2025-11-21 17:32:56,018 - INFO - Processing job_id=c567c6d5-93e6-4520-8bc8-6a23d630c0a7: CNC Operator
+2025-11-21 17:32:56,019 - INFO - Extracting clues from job: CNC Operator in Leicester LE7
+2025-11-21 17:33:02,635 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:33:02,637 - INFO - ✓ Extracted clues for job: CNC Operator
+2025-11-21 17:33:02,637 - INFO - Identifying potential companies for: CNC Operator
+2025-11-21 17:33:02,637 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:33:02,637 - INFO - 🔍 Stage 1 (Ultra-specific tech): CNC Turning Machine CNC machining Leicester LE7 LE7
+2025-11-21 17:33:02,966 - INFO - 🔍 Stage 1B (Mfg type): "CNC machining" subcontract Leicester LE7 LE7
+2025-11-21 17:33:03,279 - INFO - 🔍 Stage 2 (Job-specific): "cnc operator" OR "engineering" companies Leicester LE7 LE7
+2025-11-21 17:33:03,596 - INFO - 🔍 Stage 3 (Sector): engineering manufacturers Leicester LE7 LE7
+2025-11-21 17:33:03,929 - INFO - 🔍 Stage 4 (Official): companies LE7 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:33:04,205 - INFO - ✓ Completed 4-stage search, found 31 total results
+2025-11-21 17:33:22,179 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:33:22,185 - INFO - ✓ Industrial Cluster: Leicester LE7 → Precision Engineering, CNC Machining
+2025-11-21 17:33:22,185 - INFO - ✓ Identified 3 potential companies
+2025-11-21 17:33:22,185 - INFO -   #1: Precision Engineering UK Ltd | Postcode: LE7 1LD ✓ | Score: 56/60 (93%)
+2025-11-21 17:33:22,186 - INFO -   #2: CNC Leicester Ltd | Postcode:  ✗ | Score: 48/60 (80%)
+2025-11-21 17:33:22,186 - INFO -   #3: Leicester Multiparts | Postcode: LE7 1NS ✓ | Score: 51/60 (85%)
+2025-11-21 17:33:22,186 - INFO - ✓ Completed: Precision Engineering UK Ltd (93% confidence)
+2025-11-21 17:33:23,186 - INFO - ============================================================
+2025-11-21 17:33:23,187 - INFO - Processing job_id=ef01d3c2-9a44-475b-94f1-5484ff57b55b: CNC Operator
+2025-11-21 17:33:23,187 - INFO - Extracting clues from job: CNC Operator in Leicester LE7
+2025-11-21 17:33:31,560 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:33:31,563 - INFO - ✓ Extracted clues for job: CNC Operator
+2025-11-21 17:33:31,563 - INFO - Identifying potential companies for: CNC Operator
+2025-11-21 17:33:31,563 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:33:31,563 - INFO - 🔍 Stage 1 (Ultra-specific tech): CNC Milling Machine Leicester LE7 LE7
+2025-11-21 17:33:33,057 - INFO - 🔍 Stage 2 (Job-specific): "cnc operator" OR "" companies Leicester LE7 LE7
+2025-11-21 17:33:34,318 - INFO - 🔍 Stage 4 (Official): companies LE7 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:33:34,599 - INFO - ✓ Completed 4-stage search, found 23 total results
+2025-11-21 17:33:47,444 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:33:47,447 - INFO - ✓ Industrial Cluster: Leicester LE7 → Engineering, CNC Machining, Precision Engineering
+2025-11-21 17:33:47,447 - INFO - ✓ Identified 3 potential companies
+2025-11-21 17:33:47,447 - INFO -   #1: R O C Engineering | Postcode: LE7 3FP ✓ | Score: 54/60 (90%)
+2025-11-21 17:33:47,448 - INFO -   #2: PP Machine Tools Ltd | Postcode: LE7 7LE ✓ | Score: 51/60 (85%)
+2025-11-21 17:33:47,448 - INFO -   #3: Woolley GMC Engineering Company Limited | Postcode: LE7 1NL ✓ | Score: 48/60 (80%)
+2025-11-21 17:33:47,448 - INFO - ✓ Completed: R O C Engineering (90% confidence)
+2025-11-21 17:33:48,449 - INFO - ============================================================
+2025-11-21 17:33:48,449 - INFO - Processing job_id=9f6d4ec9-ee76-4613-9501-f2fff85be0de: Graduate Engineer
+2025-11-21 17:33:48,449 - INFO - Extracting clues from job: Graduate Engineer in Leicester, LE19
+2025-11-21 17:33:56,708 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:33:56,714 - INFO - ✓ Extracted clues for job: Graduate Engineer
+2025-11-21 17:33:56,715 - INFO - Identifying potential companies for: Graduate Engineer
+2025-11-21 17:33:56,715 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:33:56,715 - INFO - 🔍 Stage 1 (Ultra-specific tech): CNC EDM Leicester, LE19 LE19
+2025-11-21 17:33:57,915 - INFO - 🔍 Stage 1B (Mfg type): "advanced CNC and EDM-based machinery" subcontract Leicester, LE19 LE19
+2025-11-21 17:33:59,176 - INFO - 🔍 Stage 2 (Job-specific): "graduate engineering" OR "aerospace" companies Leicester, LE19 LE19
+2025-11-21 17:34:00,371 - INFO - 🔍 Stage 3 (Sector): aerospace manufacturers Leicester, LE19 LE19
+2025-11-21 17:34:02,058 - INFO - 🔍 Stage 4 (Official): companies LE19 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:34:03,674 - INFO - ✓ Completed 4-stage search, found 31 total results
+2025-11-21 17:34:28,274 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:34:28,276 - INFO - ✓ Industrial Cluster: Leicester, LE19 → Advanced CNC Machinery, Aerospace Manufacturing, Industrial Applications
+2025-11-21 17:34:28,276 - INFO - ✓ Identified 5 potential companies
+2025-11-21 17:34:28,276 - INFO -   #1: JWA CNC Precision Limited | Postcode: LE19 1WH ✓ | Score: 55/60 (92%)
+2025-11-21 17:34:28,278 - INFO -   #2: Howmet Fastening Systems | Postcode: LE19 1WH ✓ | Score: 54/60 (90%)
+2025-11-21 17:34:28,278 - INFO -   #3: Hexcel Reinforcements UK Limited | Postcode: LE19 2FZ ✓ | Score: 53/60 (88%)
+2025-11-21 17:34:28,278 - INFO -   #4: Eurospark | Postcode: None ✗ | Score: 47/60 (78%)
+2025-11-21 17:34:28,278 - INFO -   #5: Aerospace Work Limited | Postcode: None ✗ | Score: 42/60 (70%)
+2025-11-21 17:34:28,280 - INFO - ✓ Completed: JWA CNC Precision Limited (92% confidence)
+2025-11-21 17:34:29,282 - INFO - ============================================================
+2025-11-21 17:34:29,283 - INFO - Processing job_id=4cd21f6c-5252-4377-a8b9-8243d13680c5: Finance Manager
+2025-11-21 17:34:29,283 - INFO - Extracting clues from job: Finance Manager in Leicestershire
+2025-11-21 17:34:37,991 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:34:37,996 - INFO - ✓ Extracted clues for job: Finance Manager
+2025-11-21 17:34:37,997 - INFO - Identifying potential companies for: Finance Manager
+2025-11-21 17:34:37,997 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:34:37,997 - INFO - 🔍 Stage 2 (Job-specific): "finance manager" OR "engineering services" companies Leicestershire 
+2025-11-21 17:34:39,226 - INFO - 🔍 Stage 3 (Sector): engineering services manufacturers Leicestershire 
+2025-11-21 17:34:40,397 - INFO - 🔍 Stage 4 (Official): companies  manufacturing site:companieshouse.gov.uk
+2025-11-21 17:34:41,791 - INFO - ✓ Completed 4-stage search, found 21 total results
+2025-11-21 17:34:57,786 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:34:57,788 - INFO - ✓ Industrial Cluster: Leicestershire → Engineering Services, Manufacturing, Service-led
+2025-11-21 17:34:57,788 - INFO - ✓ Identified 4 potential companies
+2025-11-21 17:34:57,788 - INFO -   #1: Leicester Engineering Services | Postcode: LE7 1PD ✓ | Score: 47/60 (78%)
+2025-11-21 17:34:57,788 - INFO -   #2: Opus Precision Engineers | Postcode: LE2 0CQ ✓ | Score: 45/60 (75%)
+2025-11-21 17:34:57,789 - INFO -   #3: Waygate Engineering Ltd | Postcode: LE3 2BQ ✓ | Score: 43/60 (72%)
+2025-11-21 17:34:57,789 - INFO -   #4: MEC Precision Engineering | Postcode: LE11 1PW ✓ | Score: 41/60 (68%)
+2025-11-21 17:34:57,789 - INFO - ✓ Completed: Leicester Engineering Services (78% confidence)
+2025-11-21 17:34:58,790 - INFO - ============================================================
+2025-11-21 17:34:58,791 - INFO - Processing job_id=835ca563-022b-41be-9ac3-7521b4776395: Business Development Lead
+2025-11-21 17:34:58,791 - INFO - Extracting clues from job: Business Development Lead in Leicester
+2025-11-21 17:35:05,176 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:35:05,178 - INFO - ✓ Extracted clues for job: Business Development Lead
+2025-11-21 17:35:05,178 - INFO - Identifying potential companies for: Business Development Lead
+2025-11-21 17:35:05,179 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:35:05,179 - INFO - 🔍 Stage 2 (Job-specific): "business development lead" OR "Sales" companies Leicester 
+2025-11-21 17:35:06,274 - INFO - 🔍 Stage 3 (Sector): Sales manufacturers Leicester 
+2025-11-21 17:35:07,548 - INFO - 🔍 Stage 4 (Official): companies  manufacturing site:companieshouse.gov.uk
+2025-11-21 17:35:07,841 - INFO - ✓ Completed 4-stage search, found 21 total results
+2025-11-21 17:35:16,041 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:35:16,050 - INFO - ✓ Industrial Cluster: Leicester → Sales, Business Development
+2025-11-21 17:35:16,050 - INFO - ✓ Identified 2 potential companies
+2025-11-21 17:35:16,050 - INFO -   #1: Paragon Sales Solutions | Postcode: LE1 5FQ ✓ | Score: 47/60 (78%)
+2025-11-21 17:35:16,050 - INFO -   #2: Impact Ducting Sales Leicester | Postcode: LE4 9JD ✗ | Score: 41/60 (68%)
+2025-11-21 17:35:16,050 - INFO - ✓ Completed: Paragon Sales Solutions (78% confidence)
+2025-11-21 17:35:17,052 - INFO - ============================================================
+2025-11-21 17:35:17,052 - INFO - Processing job_id=9e6a68dc-99a3-4e68-8ca5-36b2b536147a: Welder
+2025-11-21 17:35:17,052 - INFO - Extracting clues from job: Welder in Loughborough, LE11
+2025-11-21 17:35:23,436 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:35:23,438 - INFO - ✓ Extracted clues for job: Welder
+2025-11-21 17:35:23,438 - INFO - Identifying potential companies for: Welder
+2025-11-21 17:35:23,438 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:35:23,438 - INFO - 🔍 Stage 1 (Ultra-specific tech): Welding and Fabrication Loughborough, LE11 LE11
+2025-11-21 17:35:24,741 - INFO - 🔍 Stage 1B (Mfg type): "Welding and Fabrication" subcontract Loughborough, LE11 LE11
+2025-11-21 17:35:26,011 - INFO - 🔍 Stage 2 (Job-specific): "welder" OR "" companies Loughborough, LE11 LE11
+2025-11-21 17:35:27,235 - INFO - 🔍 Stage 4 (Official): companies LE11 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:35:28,723 - INFO - ✓ Completed 4-stage search, found 23 total results
+2025-11-21 17:35:40,847 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:35:40,852 - INFO - ✓ Industrial Cluster: Loughborough, LE11 → Welding and Fabrication, Engineering
+2025-11-21 17:35:40,853 - INFO - ✓ Identified 3 potential companies
+2025-11-21 17:35:40,853 - INFO -   #1: Alway Sheet Metal Ltd | Postcode: LE11 5GX ✓ | Score: 57/60 (95%)
+2025-11-21 17:35:40,853 - INFO -   #2: Charnwood Paint Specialists | Postcode: LE11 5RA ✓ | Score: 52/60 (87%)
+2025-11-21 17:35:40,854 - INFO -   #3: Sileby Fabrications Ltd | Postcode: LE11 1HL ✓ | Score: 51/60 (85%)
+2025-11-21 17:35:40,855 - INFO - ✓ Completed: Alway Sheet Metal Ltd (95% confidence)
+2025-11-21 17:35:41,857 - INFO - ============================================================
+2025-11-21 17:35:41,858 - INFO - Processing job_id=: 
+2025-11-21 17:35:41,858 - INFO - Extracting clues from job:  in 
+2025-11-21 17:35:49,068 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:35:49,072 - INFO - ✓ Extracted clues for job: 
+2025-11-21 17:35:49,073 - INFO - Identifying potential companies for: 
+2025-11-21 17:35:49,073 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:35:49,073 - INFO - 🔍 Stage 4 (Official): companies  manufacturing site:companieshouse.gov.uk
+2025-11-21 17:35:49,359 - INFO - ✓ Completed 4-stage search, found 5 total results
+2025-11-21 17:35:52,048 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:35:52,059 - INFO - ✓ Industrial Cluster: Unknown area → 
+2025-11-21 17:35:52,059 - INFO - ✓ Identified 0 potential companies
+2025-11-21 17:35:52,060 - INFO - ✓ Completed:  (0% confidence)
+2025-11-21 17:35:53,061 - INFO - ============================================================
+2025-11-21 17:35:53,061 - INFO - Processing job_id=b40f8b25-1e4c-4b2e-86e8-42856403209a: plater welder
+2025-11-21 17:35:53,062 - INFO - Extracting clues from job: plater welder in Loughborough, Leicestershire
+2025-11-21 17:36:00,872 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:36:00,873 - INFO - ✓ Extracted clues for job: plater welder
+2025-11-21 17:36:00,873 - INFO - Identifying potential companies for: plater welder
+2025-11-21 17:36:00,873 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:36:00,873 - INFO - 🔍 Stage 1 (Ultra-specific tech): metal fabrication Loughborough, Leicestershire LE11
+2025-11-21 17:36:01,916 - INFO - 🔍 Stage 1B (Mfg type): "metal fabrication" subcontract Loughborough, Leicestershire LE11
+2025-11-21 17:36:03,226 - INFO - 🔍 Stage 2 (Job-specific): "plater welder" OR "" companies Loughborough, Leicestershire LE11
+2025-11-21 17:36:04,960 - INFO - 🔍 Stage 4 (Official): companies LE11 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:36:05,250 - INFO - ✓ Completed 4-stage search, found 19 total results
+2025-11-21 17:36:26,823 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:36:26,826 - INFO - ✓ Industrial Cluster: Loughborough, Leicestershire → Metal Fabrication, Steel Fabrication
+2025-11-21 17:36:26,826 - INFO - ✓ Identified 4 potential companies
+2025-11-21 17:36:26,826 - INFO -   #1: Sileby Fabrications Ltd | Postcode: LE11 1HL ✓ | Score: 56/60 (93%)
+2025-11-21 17:36:26,826 - INFO -   #2: JC Metalworks Ltd | Postcode: LE11 5RE ✗ | Score: 52/60 (87%)
+2025-11-21 17:36:26,826 - INFO -   #3: Adey Steel | Postcode: LE11 XXX ✗ | Score: 51/60 (85%)
+2025-11-21 17:36:26,826 - INFO -   #4: Lauda Fabrications Ltd | Postcode: LE11 XXX ✗ | Score: 50/60 (83%)
+2025-11-21 17:36:26,826 - INFO - ✓ Completed: Sileby Fabrications Ltd (93% confidence)
+2025-11-21 17:36:27,827 - INFO - ============================================================
+2025-11-21 17:36:27,827 - INFO - Processing job_id=: 
+2025-11-21 17:36:27,828 - INFO - Extracting clues from job:  in Unknown
+2025-11-21 17:36:30,715 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:36:30,717 - INFO - ✓ Extracted clues for job: 
+2025-11-21 17:36:30,717 - INFO - Identifying potential companies for: 
+2025-11-21 17:36:30,717 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:36:30,717 - INFO - 🔍 Stage 4 (Official): companies  manufacturing site:companieshouse.gov.uk
+2025-11-21 17:36:30,998 - INFO - ✓ Completed 4-stage search, found 5 total results
+2025-11-21 17:36:34,555 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:36:34,557 - INFO - ✓ Industrial Cluster: Unknown/Not provided → 
+2025-11-21 17:36:34,557 - INFO - ✓ Identified 0 potential companies
+2025-11-21 17:36:34,558 - INFO - ✓ Completed:  (0% confidence)
+2025-11-21 17:36:35,559 - INFO - ============================================================
+2025-11-21 17:36:35,559 - INFO - Processing job_id=fc188504-4a78-4b91-9bc9-6e5ebfe7d306: General operative
+2025-11-21 17:36:35,560 - INFO - Extracting clues from job: General operative in Leicester, LE3 6NW
+2025-11-21 17:36:43,007 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:36:43,009 - INFO - ✓ Extracted clues for job: General operative
+2025-11-21 17:36:43,009 - INFO - Identifying potential companies for: General operative
+2025-11-21 17:36:43,010 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:36:43,010 - INFO - 🔍 Stage 2 (Job-specific): "general operative" OR "" companies Leicester, LE3 6NW LE3 6NW
+2025-11-21 17:36:44,612 - INFO - 🔍 Stage 4 (Official): companies LE3 6NW manufacturing site:companieshouse.gov.uk
+2025-11-21 17:36:44,900 - INFO - ✓ Completed 4-stage search, found 4 total results
+2025-11-21 17:36:48,624 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:36:48,625 - INFO - ✓ Industrial Cluster: Leicester, LE3 6NW → 
+2025-11-21 17:36:48,625 - INFO - ✓ Identified 0 potential companies
+2025-11-21 17:36:48,626 - INFO - ✓ Completed:  (0% confidence)
+2025-11-21 17:36:49,628 - INFO - ============================================================
+2025-11-21 17:36:49,628 - INFO - Processing job_id=3610c82c-c60b-4a82-9712-102dd9c5035f: Work Shop supervisor
+2025-11-21 17:36:49,629 - INFO - Extracting clues from job: Work Shop supervisor in Leicester, specifically LE3 6NW
+2025-11-21 17:37:00,055 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:37:00,080 - INFO - ✓ Extracted clues for job: Work Shop supervisor
+2025-11-21 17:37:00,080 - INFO - Identifying potential companies for: Work Shop supervisor
+2025-11-21 17:37:00,080 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:37:00,080 - INFO - 🔍 Stage 1 (Ultra-specific tech): Amada machinery laser cutting Leicester, specifically LE3 6NW LE3 6NW
+2025-11-21 17:37:01,418 - INFO - 🔍 Stage 1B (Mfg type): "Metal sheet fabrication" subcontract Leicester, specifically LE3 6NW LE3 6NW
+2025-11-21 17:37:04,347 - INFO - 🔍 Stage 2 (Job-specific): "work shop supervisor" OR "Engineering Manufacturing" companies Leicester, specifically LE3 6NW LE3 6NW
+2025-11-21 17:37:05,741 - INFO - 🔍 Stage 3 (Sector): Engineering Manufacturing manufacturers Leicester, specifically LE3 6NW LE3 6NW
+2025-11-21 17:37:07,380 - INFO - 🔍 Stage 4 (Official): companies LE3 6NW manufacturing site:companieshouse.gov.uk
+2025-11-21 17:37:07,664 - INFO - ✓ Completed 4-stage search, found 22 total results
+2025-11-21 17:37:16,314 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:37:16,315 - INFO - ✓ Industrial Cluster: Leicester, specifically LE3 6NW → Engineering Manufacturing, Metal Sheet Fabrication
+2025-11-21 17:37:16,315 - INFO - ✓ Identified 1 potential companies
+2025-11-21 17:37:16,315 - INFO -   #1: AVW Fabrications Limited | Postcode: LE?? ??? ✗ | Score: 30/60 (50%)
+2025-11-21 17:37:16,315 - INFO - ✓ Completed: AVW Fabrications Limited (50% confidence)
+2025-11-21 17:37:17,317 - INFO - ============================================================
+2025-11-21 17:37:17,317 - INFO - Processing job_id=5f9ab5bd-3e0d-464f-978f-117ae69662b0: CNC Setter / operator
+2025-11-21 17:37:17,317 - INFO - Extracting clues from job: CNC Setter / operator in Leicester LE4
+2025-11-21 17:37:25,149 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:37:25,151 - INFO - ✓ Extracted clues for job: CNC Setter / operator
+2025-11-21 17:37:25,151 - INFO - Identifying potential companies for: CNC Setter / operator
+2025-11-21 17:37:25,151 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:37:25,151 - INFO - 🔍 Stage 1 (Ultra-specific tech): CNC Milling CNC Turning Leicester LE4 LE4
+2025-11-21 17:37:26,691 - INFO - 🔍 Stage 2 (Job-specific): "cnc setter / operator" OR "engineering" companies Leicester LE4 LE4
+2025-11-21 17:37:27,955 - INFO - 🔍 Stage 3 (Sector): engineering manufacturers Leicester LE4 LE4
+2025-11-21 17:37:28,274 - INFO - 🔍 Stage 4 (Official): companies LE4 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:37:29,497 - INFO - ✓ Completed 4-stage search, found 31 total results
+2025-11-21 17:37:44,048 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:37:44,052 - INFO - ✓ Industrial Cluster: Leicester LE4 → CNC Milling, CNC Turning, Precision Engineering
+2025-11-21 17:37:44,052 - INFO - ✓ Identified 3 potential companies
+2025-11-21 17:37:44,052 - INFO -   #1: CNC Leicester Ltd | Postcode: LE4 9JE ✓ | Score: 60/60 (100%)
+2025-11-21 17:37:44,053 - INFO -   #2: Kaby Engineers Limited | Postcode: LE4 1BF ✓ | Score: 57/60 (95%)
+2025-11-21 17:37:44,053 - INFO -   #3: Leicester Precision Components | Postcode: LE4 ✓ | Score: 54/60 (90%)
+2025-11-21 17:37:44,053 - INFO - ✓ Completed: CNC Leicester Ltd (100% confidence)
+2025-11-21 17:37:45,053 - INFO - ============================================================
+2025-11-21 17:37:45,054 - INFO - Processing job_id=482fd2a3-7a4f-45fb-bb0f-040a72b337b7: CNC Setter / Operator
+2025-11-21 17:37:45,054 - INFO - Extracting clues from job: CNC Setter / Operator in Leicester, Leicestershire
+2025-11-21 17:37:53,278 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:37:53,281 - INFO - ✓ Extracted clues for job: CNC Setter / Operator
+2025-11-21 17:37:53,281 - INFO - Identifying potential companies for: CNC Setter / Operator
+2025-11-21 17:37:53,281 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:37:53,281 - INFO - 🔍 Stage 1 (Ultra-specific tech): CNC Milling Machine Mazak Controls Leicester, Leicestershire 
+2025-11-21 17:37:54,548 - INFO - 🔍 Stage 1B (Mfg type): "CNC Milling" subcontract Leicester, Leicestershire 
+2025-11-21 17:37:55,715 - INFO - 🔍 Stage 2 (Job-specific): "cnc setter / operator" OR "" companies Leicester, Leicestershire 
+2025-11-21 17:37:57,025 - INFO - 🔍 Stage 4 (Official): companies  manufacturing site:companieshouse.gov.uk
+2025-11-21 17:37:57,293 - INFO - ✓ Completed 4-stage search, found 23 total results
+2025-11-21 17:38:11,581 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:38:11,583 - INFO - ✓ Industrial Cluster: Leicester, Leicestershire → CNC Milling, Precision Engineering, Manufacturing
+2025-11-21 17:38:11,584 - INFO - ✓ Identified 3 potential companies
+2025-11-21 17:38:11,584 - INFO -   #1: CNC Leicester Ltd | Postcode: None ✗ | Score: 48/60 (80%)
+2025-11-21 17:38:11,584 - INFO -   #2: G-Mach | Postcode: None ✗ | Score: 44/60 (73%)
+2025-11-21 17:38:11,584 - INFO -   #3: Waygate Engineering Ltd | Postcode: None ✗ | Score: 41/60 (68%)
+2025-11-21 17:38:11,584 - INFO - ✓ Completed: CNC Leicester Ltd (80% confidence)
+2025-11-21 17:38:12,586 - INFO - ============================================================
+2025-11-21 17:38:12,586 - INFO - Processing job_id=4cd4238a-9e75-418e-b5a6-07ab6458e9da: CNC setter / operator
+2025-11-21 17:38:12,586 - INFO - Extracting clues from job: CNC setter / operator in Leicester
+2025-11-21 17:38:22,253 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:38:22,255 - INFO - ✓ Extracted clues for job: CNC setter / operator
+2025-11-21 17:38:22,255 - INFO - Identifying potential companies for: CNC setter / operator
+2025-11-21 17:38:22,255 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:38:22,255 - INFO - 🔍 Stage 1 (Ultra-specific tech): CNC Milling Machine Mazak Leicester LE4
+2025-11-21 17:38:23,633 - INFO - 🔍 Stage 1B (Mfg type): "CNC Milling" subcontract Leicester LE4
+2025-11-21 17:38:24,731 - INFO - 🔍 Stage 2 (Job-specific): "cnc setter / operator" OR "Engineering" companies Leicester LE4
+2025-11-21 17:38:26,183 - INFO - 🔍 Stage 3 (Sector): Engineering manufacturers Leicester LE4
+2025-11-21 17:38:27,761 - INFO - 🔍 Stage 4 (Official): companies LE4 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:38:28,046 - INFO - ✓ Completed 4-stage search, found 31 total results
+2025-11-21 17:38:45,433 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:38:45,439 - INFO - ✓ Industrial Cluster: Leicester → Engineering, CNC Milling, Precision Engineering
+2025-11-21 17:38:45,439 - INFO - ✓ Identified 4 potential companies
+2025-11-21 17:38:45,439 - INFO -   #1: CNC Leicester Ltd | Postcode: LE4 9JE ✓ | Score: 55/60 (92%)
+2025-11-21 17:38:45,439 - INFO -   #2: Tooling Units Ltd | Postcode: LE4 9EU ✓ | Score: 53/60 (88%)
+2025-11-21 17:38:45,439 - INFO -   #3: SPS Technologies Limited | Postcode: LE4 9HX ✓ | Score: 52/60 (87%)
+2025-11-21 17:38:45,439 - INFO -   #4: Waygate Engineering Ltd | Postcode: LE4 ✓ | Score: 51/60 (85%)
+2025-11-21 17:38:45,440 - INFO - ✓ Completed: CNC Leicester Ltd (92% confidence)
+2025-11-21 17:38:46,441 - INFO - ============================================================
+2025-11-21 17:38:46,442 - INFO - Processing job_id=5583de8e-f1bd-42ee-97da-cf484ba8e600: Welder
+2025-11-21 17:38:46,442 - INFO - Extracting clues from job: Welder in Leicester LE4
+2025-11-21 17:38:53,565 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:38:53,567 - INFO - ✓ Extracted clues for job: Welder
+2025-11-21 17:38:53,567 - INFO - Identifying potential companies for: Welder
+2025-11-21 17:38:53,567 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:38:53,567 - INFO - 🔍 Stage 1 (Ultra-specific tech): MIG welding Grinding Leicester LE4 LE4
+2025-11-21 17:38:53,879 - INFO - 🔍 Stage 1B (Mfg type): "metal fabrication" subcontract Leicester LE4 LE4
+2025-11-21 17:38:54,173 - INFO - 🔍 Stage 2 (Job-specific): "welder" OR "engineering" companies Leicester LE4 LE4
+2025-11-21 17:38:54,451 - INFO - 🔍 Stage 3 (Sector): engineering manufacturers Leicester LE4 LE4
+2025-11-21 17:38:54,729 - INFO - 🔍 Stage 4 (Official): companies LE4 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:38:55,013 - INFO - ✓ Completed 4-stage search, found 31 total results
+2025-11-21 17:39:11,002 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:39:11,007 - INFO - ✓ Industrial Cluster: Leicester LE4 → engineering, fabrication, metalwork
+2025-11-21 17:39:11,007 - INFO - ✓ Identified 5 potential companies
+2025-11-21 17:39:11,007 - INFO -   #1: Tooling Units (Leicester) Ltd | Postcode: LE4 9EU ✓ | Score: 60/60 (100%)
+2025-11-21 17:39:11,007 - INFO -   #2: Springfield Pressings Ltd | Postcode: LE4 9HX ✓ | Score: 56/60 (93%)
+2025-11-21 17:39:11,007 - INFO -   #3: Waygate Engineering Ltd | Postcode: LE4 ✓ | Score: 52/60 (87%)
+2025-11-21 17:39:11,007 - INFO -   #4: B&P Fabrications | Postcode: LE4 ✓ | Score: 48/60 (80%)
+2025-11-21 17:39:11,007 - INFO -   #5: F1 Manufacturing | Postcode: LE4 ✓ | Score: 45/60 (75%)
+2025-11-21 17:39:11,008 - INFO - ✓ Completed: Tooling Units (Leicester) Ltd (100% confidence)
+2025-11-21 17:39:12,009 - INFO - ============================================================
+2025-11-21 17:39:12,010 - INFO - Processing job_id=45ab557c-7518-4592-bb26-8d0a71ec600a: General op with FLT licence
+2025-11-21 17:39:12,010 - INFO - Extracting clues from job: General op with FLT licence in Leicester LE3
+2025-11-21 17:39:18,610 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:39:18,617 - INFO - ✓ Extracted clues for job: General op with FLT licence
+2025-11-21 17:39:18,618 - INFO - Identifying potential companies for: General op with FLT licence
+2025-11-21 17:39:18,618 - INFO - 🔍 Performing web searches to find companies...
+2025-11-21 17:39:18,618 - INFO - 🔍 Stage 1 (Ultra-specific tech): FLT (Forklift Truck) Leicester LE3 LE3
+2025-11-21 17:39:18,938 - INFO - 🔍 Stage 2 (Job-specific): "general op with flt licence" OR "engineering" companies Leicester LE3 LE3
+2025-11-21 17:39:19,221 - INFO - 🔍 Stage 3 (Sector): engineering manufacturers Leicester LE3 LE3
+2025-11-21 17:39:19,527 - INFO - 🔍 Stage 4 (Official): companies LE3 manufacturing site:companieshouse.gov.uk
+2025-11-21 17:39:19,809 - INFO - ✓ Completed 4-stage search, found 31 total results
+2025-11-21 17:39:33,023 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-21 17:39:33,030 - INFO - ✓ Industrial Cluster: Leicester LE3 → Engineering, Logistics
+2025-11-21 17:39:33,030 - INFO - ✓ Identified 4 potential companies
+2025-11-21 17:39:33,030 - INFO -   #1: Glenborough Engineering Co Ltd. | Postcode: LE3 8BT ✓ | Score: 52/60 (87%)
+2025-11-21 17:39:33,031 - INFO -   #2: Steele Engineering Ltd. | Postcode: LE3 1PD ✓ | Score: 49/60 (82%)
+2025-11-21 17:39:33,031 - INFO -   #3: Rieke Manufacturing UK Limited | Postcode: LE3 1UG ✓ | Score: 48/60 (80%)
+2025-11-21 17:39:33,031 - INFO -   #4: Cahill Plastics Ltd. | Postcode: LE3 5DH ✓ | Score: 47/60 (78%)
+2025-11-21 17:39:33,031 - INFO - ✓ Completed: Glenborough Engineering Co Ltd. (87% confidence)
+================================================================================
+🔬 SAMPLE RUN: Testing Improved Search System
+================================================================================
+Processing first 25 jobs to validate improvements
+
+Improvements tested:
+  ✓ 4-stage technical keyword search
+  ✓ Ultra-specific manufacturing type matching
+  ✓ Machine brand searches (Mazak, Haas, etc.)
+  ✓ Strict filtering (CNC ≠ pressing ≠ fabrication)
+  ✓ Excludes wrong company types (retail, energy, etc.)
+
+📖 Reading input CSV: /Users/louisamayhanrahan/code/Ind_Output/philagent/final_output/1224d045-b920-49a6-895a-1dbd1cf9ec21_jobs_enriched_partial.csv
+✓ Processing SAMPLE: 25 jobs (out of 518 total)
+
+================================================================================
+[1/25] Panel Wirer in Leicester, LE8
+================================================================================
+OLD: Siya Retail Ltd
+NEW: Cord Controls Ltd (90%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[2/25] General Operative /site labourer in Glenfield, Leicester LE3 6NW
+================================================================================
+OLD: Wojak Ltd
+NEW: No companies found
+
+================================================================================
+[3/25] Work Shop supervisor in Leicester
+================================================================================
+OLD: Wojak Ltd
+NEW: AVW Fabrications Limited (91%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[4/25] CNC Setter / Operator in Leicester, Leicestershire (LE4)
+================================================================================
+OLD: Enable Manufacturing Ltd
+NEW: CNC Leicester Ltd (92%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[5/25] CNC setter / operator in Leicester, Leicestershire (LE4 area)
+================================================================================
+OLD: Hamilton Adhesive Labels Ltd
+NEW: CNC Leicester Ltd (97%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[6/25] CNC Setter / operator in Leicester, LE4
+================================================================================
+OLD: CNC Leicester Ltd
+NEW: CNC Leicester Ltd (90%)
+📊 STATUS: Same company
+
+================================================================================
+[7/25] Welder in Leicester LE4
+================================================================================
+OLD: Kaby Engineers Limited
+NEW: Springfield Pressings Ltd (90%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[8/25] General op with FLT licence in Leicester LE3
+================================================================================
+OLD: Oadby Plastics
+NEW: Leicester Forklifts Limited (92%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[9/25] Welder in Oadby, Leicester LE2
+================================================================================
+OLD: Meadow Engineering & Patterns
+NEW: Paton Precision Engineering Ltd (90%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[10/25] CNC Operator in Leicester LE7
+================================================================================
+OLD: Shield Engineering (Syston) Limited
+NEW: Precision Engineering UK Ltd (93%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[11/25] CNC Operator in Leicester LE7
+================================================================================
+OLD: Precision Engineering UK Ltd
+NEW: R O C Engineering (90%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[12/25] Graduate Engineer in Leicester, LE19
+================================================================================
+OLD: Howmet Fastening Systems
+NEW: JWA CNC Precision Limited (92%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[13/25] Finance Manager in Leicestershire
+================================================================================
+OLD: 
+NEW: Leicester Engineering Services (78%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[14/25] Business Development Lead in Leicester
+================================================================================
+OLD: 
+NEW: Paragon Sales Solutions (78%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[15/25] Welder in Loughborough, LE11
+================================================================================
+OLD: Sileby Fabrications Ltd
+NEW: Alway Sheet Metal Ltd (95%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[16/25]  in 
+================================================================================
+OLD: 
+NEW: No companies found
+
+================================================================================
+[17/25] plater welder in Loughborough, Leicestershire
+================================================================================
+OLD: Form Manufacturing Ltd
+NEW: Sileby Fabrications Ltd (93%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[18/25]  in Unknown
+================================================================================
+OLD: 
+NEW: No companies found
+
+================================================================================
+[19/25] General operative in Leicester, LE3 6NW
+================================================================================
+OLD: 
+NEW: No companies found
+
+================================================================================
+[20/25] Work Shop supervisor in Leicester, specifically LE3 6NW
+================================================================================
+OLD: Wojak Ltd
+NEW: AVW Fabrications Limited (50%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[21/25] CNC Setter / operator in Leicester LE4
+================================================================================
+OLD: CNC Leicester Ltd
+NEW: CNC Leicester Ltd (100%)
+📊 STATUS: Same company
+
+================================================================================
+[22/25] CNC Setter / Operator in Leicester, Leicestershire
+================================================================================
+OLD: CNC Leicester Ltd
+NEW: CNC Leicester Ltd (80%)
+📊 STATUS: Same company
+
+================================================================================
+[23/25] CNC setter / operator in Leicester
+================================================================================
+OLD: Lestercast Ltd
+NEW: CNC Leicester Ltd (92%)
+📊 STATUS: CHANGED (likely improved)
+
+================================================================================
+[24/25] Welder in Leicester LE4
+================================================================================
+OLD: Tooling Units (Leicester) Ltd
+NEW: Tooling Units (Leicester) Ltd (100%)
+📊 STATUS: Same company
+
+================================================================================
+[25/25] General op with FLT licence in Leicester LE3
+================================================================================
+OLD: RDL Technologies Ltd
+NEW: Glenborough Engineering Co Ltd. (87%)
+📊 STATUS: CHANGED (likely improved)
+
+
+================================================================================
+📊 SAMPLE RESULTS SUMMARY
+================================================================================
+Total processed: 25
+Changed results: 17 (68.0%)
+Same results: 4
+Errors/No results: 4
+
+✅ Sample saved to: /Users/louisamayhanrahan/code/Ind_Output/philagent/final_output/sample_improved_20251121_172853.csv
+
+💡 Review the sample, then run full batch if improvements look good!

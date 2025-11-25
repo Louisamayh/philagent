@@ -161,15 +161,21 @@ STEPS:
 
 === OUTPUT FORMAT ===
 
-Return a JSON object with:
+⚠️ CRITICAL: When you call done(), you MUST pass the actual JSON object with all the links as the 'text' parameter.
+DO NOT just say "the results are provided" - you must ACTUALLY provide the full JSON in the done() call.
+
+The JSON object must have:
    - current_page_url: The URL of the current search results page (string)
-   - links: List of link objects
+   - links: List of ALL link objects you collected
 
 Each link object MUST have:
    - link_url: The full URL of the job detail page
    - link_text: The job title text from the link (for verification)
 
-Example output:
+Example done() call:
+done(text='{{ "current_page_url": "https://www.cv-library.co.uk/...", "links": [{{ "link_url": "https://www.cv-library.co.uk/job/12345678/...", "link_text": "Senior Software Engineer" }}, {{ "link_url": "https://www.cv-library.co.uk/job/87654321/...", "link_text": "Junior Developer" }}] }}', success=True)
+
+Example output format:
 {{
     "current_page_url": "https://www.cv-library.co.uk/search-jobs?q=engineer&geo=london&distance=10&page={page_number}",
     "links": [
@@ -271,6 +277,29 @@ async def collect_links_from_single_page(
                 result_json = fr
         except Exception as e:
             logger.debug(f"final_result() raised: {e}")
+
+    # ADDITIONAL FALLBACK: Check agent's extracted_content (might be in history)
+    if not result_json and result_json_str is None:
+        try:
+            # Look through agent's action history for extracted content
+            if hasattr(history, 'history') and history.history:
+                for action in reversed(history.history):  # Start from most recent
+                    if hasattr(action, 'result') and action.result:
+                        result_text = str(action.result)
+                        # Look for JSON pattern in the result
+                        if '"link_url"' in result_text and '"link_text"' in result_text:
+                            # Try to extract JSON from the text
+                            import re
+                            json_match = re.search(r'\{[\s\S]*"links"[\s\S]*\[[\s\S]*\][\s\S]*\}', result_text)
+                            if json_match:
+                                try:
+                                    result_json = json.loads(json_match.group(0))
+                                    logger.info("✓ Found links in agent's action history!")
+                                    break
+                                except:
+                                    pass
+        except Exception as e:
+            logger.debug(f"Could not extract from agent history: {e}")
 
     # Parse JSON string if we have one
     if result_json_str:
